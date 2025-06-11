@@ -23,7 +23,8 @@
                                         </p>
                                     {% elif item.type == 'rim' %}
                                         <h5 class="mb-1">{{ item.product.model.brand }} {{ item.product.model.name }}</h5>
-                                        <p class="mb-0 text-muted">
+                                        <p class="mb-0 text-secondary">
+                                            {{ item.product.diameter|floatformat:1 }}x{{ item.product.width|floatformat:1 }} {{ item.product.bolt_pattern }}
                                         </p>
                                     {% else %}
                                         <span class="text-danger">Ошибка: неизвестный тип товара</span>

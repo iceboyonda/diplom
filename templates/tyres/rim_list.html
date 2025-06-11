@@ -3,16 +3,240 @@
 {% block title %}Каталог дисков - Tyre Trust{% endblock %}
 
 {% block content %}
+<div class="catalogue-container">
 <div class="row mb-3">
     <div class="col text-end">
         {# Можно добавить ссылку на FAQ по дискам, если такой будет #}
         {# <a href="{% url 'tyres:faq_rims' %}" class="btn btn-outline-info">FAQ: Как выбрать диски?</a> #}
     </div>
 </div>
+
+    <!-- Include Mobile Filters -->
+    <div class="mobile-filters-wrapper d-md-none">
+        <!-- Filter Toggle Button -->
+        <button class="btn btn-primary w-100 mb-3 filter-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#filterOffcanvas">
+            <i class="bi bi-funnel-fill me-2"></i>Фильтры
+        </button>
+
+        <!-- Offcanvas Bottom Sheet -->
+        <div class="offcanvas offcanvas-bottom h-75" tabindex="-1" id="filterOffcanvas">
+            <div class="offcanvas-header border-bottom">
+                <h5 class="offcanvas-title">Фильтры дисков</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <!-- Filter Sections -->
+                <div class="accordion" id="filterAccordion">
+                    <!-- Диаметр -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#diameterCollapse">
+                                Диаметр
+                            </button>
+                        </h2>
+                        <div id="diameterCollapse" class="accordion-collapse collapse show" data-bs-parent="#filterAccordion">
+                            <div class="accordion-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for diameter in available_diameters %}
+                                        <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_diameter == diameter|stringformat:'s' %}active{% endif %}"
+                                                hx-get="?diameter={{ diameter }}{{ query_string }}"
+                                                hx-target="#rims-list"
+                                                hx-push-url="true"
+                                                hx-indicator="#loading-indicator">
+                                            {{ diameter }}″
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ширина -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#widthCollapse">
+                                Ширина
+                            </button>
+                        </h2>
+                        <div id="widthCollapse" class="accordion-collapse collapse" data-bs-parent="#filterAccordion">
+                            <div class="accordion-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for width in available_widths %}
+                                        <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_width == width|stringformat:'s' %}active{% endif %}"
+                                                hx-get="?width={{ width }}{{ query_string }}"
+                                                hx-target="#rims-list"
+                                                hx-push-url="true"
+                                                hx-indicator="#loading-indicator">
+                                            {{ width }}
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Крепление -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#boltPatternCollapse">
+                                Крепление
+                            </button>
+                        </h2>
+                        <div id="boltPatternCollapse" class="accordion-collapse collapse" data-bs-parent="#filterAccordion">
+                            <div class="accordion-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for pattern in available_bolt_patterns %}
+                                        <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_bolt_pattern == pattern %}active{% endif %}"
+                                                hx-get="?bolt_pattern={{ pattern }}{{ query_string }}"
+                                                hx-target="#rims-list"
+                                                hx-push-url="true"
+                                                hx-indicator="#loading-indicator">
+                                            {{ pattern }}
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Бренд -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#brandCollapse">
+                                Бренд
+                            </button>
+                        </h2>
+                        <div id="brandCollapse" class="accordion-collapse collapse" data-bs-parent="#filterAccordion">
+                            <div class="accordion-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for brand in brands %}
+                                        <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_brand == brand %}active{% endif %}"
+                                                hx-get="?brand={{ brand }}{{ query_string }}"
+                                                hx-target="#rims-list"
+                                                hx-push-url="true"
+                                                hx-indicator="#loading-indicator">
+                                            {{ brand }}
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Материал -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#materialCollapse">
+                                Материал
+                            </button>
+                        </h2>
+                        <div id="materialCollapse" class="accordion-collapse collapse" data-bs-parent="#filterAccordion">
+                            <div class="accordion-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for material in materials %}
+                                        <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_material == material %}active{% endif %}"
+                                                hx-get="?material={{ material }}{{ query_string }}"
+                                                hx-target="#rims-list"
+                                                hx-push-url="true"
+                                                hx-indicator="#loading-indicator">
+                                            {{ material }}
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Цвет -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#colorCollapse">
+                                Цвет
+                            </button>
+                        </h2>
+                        <div id="colorCollapse" class="accordion-collapse collapse" data-bs-parent="#filterAccordion">
+                            <div class="accordion-body">
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for color in colors %}
+                                        <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_color == color %}active{% endif %}"
+                                                hx-get="?color={{ color }}{{ query_string }}"
+                                                hx-target="#rims-list"
+                                                hx-push-url="true"
+                                                hx-indicator="#loading-indicator">
+                                            {{ color }}
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Цена -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#priceCollapse">
+                                Цена
+                            </button>
+                        </h2>
+                        <div id="priceCollapse" class="accordion-collapse collapse" data-bs-parent="#filterAccordion">
+                            <div class="accordion-body">
+                                <form hx-get="{% url 'tyres:rim_list' %}" 
+                                     hx-target="#rims-list" 
+                                     hx-push-url="true"
+                                     hx-indicator="#loading-indicator">
+                                    <div class="mb-3">
+                                        <label class="form-label">Диапазон цен</label>
+                                        <div class="input-group">
+                                            <input type="number" name="min_price" class="form-control" placeholder="От" value="{{ min_price|default_if_none:'' }}">
+                                            <input type="number" name="max_price" class="form-control" placeholder="До" value="{{ max_price|default_if_none:'' }}">
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100">Применить</button>
+                                </form>
+                                
+                                <div class="d-flex flex-column gap-2 mt-3">
+                                    <button class="btn btn-outline-primary text-start filter-btn"
+                                            hx-get="?min_price=0&max_price=10000{{ query_string }}"
+                                            hx-target="#rims-list"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading-indicator">
+                                        До 10 000 ₽
+                                    </button>
+                                    <button class="btn btn-outline-primary text-start filter-btn"
+                                            hx-get="?min_price=10000&max_price=30000{{ query_string }}"
+                                            hx-target="#rims-list"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading-indicator">
+                                        10 000 - 30 000 ₽
+                                    </button>
+                                    <button class="btn btn-outline-primary text-start filter-btn"
+                                            hx-get="?min_price=30000{{ query_string }}"
+                                            hx-target="#rims-list"
+                                            hx-push-url="true"
+                                            hx-indicator="#loading-indicator">
+                                        От 30 000 ₽
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Кнопка сброса фильтров -->
+                <div class="mt-3 pb-3">
+                    <a href="{% url 'tyres:rim_list' %}" 
+                       class="btn btn-secondary w-100">
+                        Сбросить все фильтры
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <div class="row">
     <!-- Фильтры -->
-    <div class="col-md-3">
-        <div class="card mb-4 border-0 shadow-sm filter-block">
+        <div class="col-md-3 d-none d-md-block">
+        <div class="card mb-4 border-0 shadow-sm filter-block sticky-filter">
             <div class="card-header bg-transparent border-0">
                 <h5 class="mb-0">Фильтры дисков</h5>
             </div>
@@ -30,8 +254,8 @@
                         <label class="form-label">Бренд</label>
                         <select name="brand" class="form-select border-secondary">
                             <option value="">Все бренды</option>
-                            {% for brand in brands %}
-                                <option value="{{ brand }}">{{ brand }}</option>
+                            {% for brand_option in brands %}
+                                <option value="{{ brand_option }}" {% if brand_option == selected_brand %}selected{% endif %}>{{ brand_option }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -41,8 +265,8 @@
                         <label class="form-label">Диаметр</label>
                         <select name="diameter" class="form-select border-secondary">
                             <option value="">Любой</option>
-                            {% for diameter in available_diameters %}
-                                <option value="{{ diameter }}" {% if diameter == selected_diameters|first %}selected{% endif %}>{{ diameter }}</option>
+                            {% for diameter_option in available_diameters %}
+                                <option value="{{ diameter_option }}" {% if diameter_option|stringformat:"s" == selected_diameter %}selected{% endif %}>{{ diameter_option }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -52,8 +276,8 @@
                         <label class="form-label">Ширина</label>
                         <select name="width" class="form-select border-secondary">
                             <option value="">Любая</option>
-                            {% for width in available_widths %}
-                                <option value="{{ width }}" {% if width == selected_widths|first %}selected{% endif %}>{{ width }}</option>
+                            {% for width_option in available_widths %}
+                                <option value="{{ width_option }}" {% if width_option|stringformat:"s" == selected_width %}selected{% endif %}>{{ width_option }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -63,8 +287,8 @@
                         <label class="form-label">Крепление</label>
                         <select name="bolt_pattern" class="form-select border-secondary">
                             <option value="">Любое</option>
-                            {% for pattern in available_bolt_patterns %}
-                                <option value="{{ pattern }}" {% if pattern == selected_bolt_patterns|first %}selected{% endif %}>{{ pattern }}</option>
+                            {% for pattern_option in available_bolt_patterns %}
+                                <option value="{{ pattern_option }}" {% if pattern_option == selected_bolt_pattern %}selected{% endif %}>{{ pattern_option }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -74,8 +298,8 @@
                         <label class="form-label">Материал</label>
                         <select name="material" class="form-select border-secondary">
                             <option value="">Любой</option>
-                            {% for material in materials %}
-                                <option value="{{ material }}">{{ material }}</option>
+                            {% for material_option in materials %}
+                                <option value="{{ material_option }}" {% if material_option == selected_material %}selected{% endif %}>{{ material_option }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -85,8 +309,8 @@
                         <label class="form-label">Цвет</label>
                         <select name="color" class="form-select border-secondary">
                             <option value="">Любой</option>
-                            {% for color in colors %}
-                                <option value="{{ color }}">{{ color }}</option>
+                            {% for color_option in colors %}
+                                <option value="{{ color_option }}" {% if color_option == selected_color %}selected{% endif %}>{{ color_option }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -95,19 +319,15 @@
                     <div class="mb-3">
                         <label class="form-label">Цена</label>
                         <div class="input-group mb-2">
-                            <input type="number" name="min_price" class="form-control border-secondary" placeholder="От">
-                            <input type="number" name="max_price" class="form-control border-secondary" placeholder="До">
+                            <input type="number" name="min_price" class="form-control border-secondary" placeholder="От" value="{{ min_price|default_if_none:'' }}">
+                            <input type="number" name="max_price" class="form-control border-secondary" placeholder="До" value="{{ max_price|default_if_none:'' }}">
                         </div>
                     </div>
 
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary w-100">Применить</button>
                         <a href="{% url 'tyres:rim_list' %}" 
-                           class="btn btn-secondary w-100" 
-                           hx-get="{% url 'tyres:rim_list' %}" 
-                           hx-target="#rims-list" 
-                           hx-push-url="true"
-                           hx-indicator="#loading-indicator">Сбросить</a>
+                           class="btn btn-secondary w-100">Сбросить</a>
                     </div>
                 </form>
             </div>
@@ -115,8 +335,31 @@
     </div>
 
     <!-- Список дисков -->
-    <div class="col-md-9">
+        <div class="col-12 col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="catalogue-title">Каталог дисков</h1>
+            <div class="sort-buttons">
+                <div class="btn-group" role="group">
+                    <a href="?sort=price_asc{{ query_string }}" 
+                       class="btn btn-outline-secondary {% if current_sort == 'price_asc' %}active{% endif %}"
+                       hx-get="?sort=price_asc{{ query_string }}"
+                       hx-target="#rims-list"
+                       hx-push-url="true"
+                       hx-indicator="#loading-indicator">
+                        По цене ↑
+                    </a>
+                    <a href="?sort=price_desc{{ query_string }}" 
+                       class="btn btn-outline-secondary {% if current_sort == 'price_desc' %}active{% endif %}"
+                       hx-get="?sort=price_desc{{ query_string }}"
+                       hx-target="#rims-list"
+                       hx-push-url="true"
+                       hx-indicator="#loading-indicator">
+                        По цене ↓
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <!-- Индикатор загрузки -->
         <div id="loading-indicator" class="htmx-indicator text-center">
             <div class="spinner-border text-primary" role="status">
@@ -127,6 +370,7 @@
             {% include "tyres/_rims_list.html" %}
         </div>
     </div>
+</div>
 </div>
 
 <style>
@@ -169,6 +413,229 @@
     body.dark-theme .filter-block::before {
         background: linear-gradient(135deg, #00eaff, #3973f7, #8e44ad, #ff6ec4);
         box-shadow: 0 0 12px 2px #00c3ff55;
+    }
+    .btn-outline-secondary-gradient {
+        background: linear-gradient(90deg, #8e44ad, #3498db);
+        color: #fff;
+        border: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-outline-secondary-gradient:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        color: #fff;
+    }
+    .catalogue-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+    @media (max-width: 1200px) {
+        .catalogue-container {
+            padding-left: 12px;
+            padding-right: 12px;
+        }
+    }
+    .catalogue-title {
+        margin-bottom: 0;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-color);
+        text-align: left;
+        padding-bottom: 0;
+        line-height: 1.1;
+    }
+    .sticky-filter {
+        position: sticky;
+        top: 2rem;
+        z-index: 10;
+    }
+    .sort-buttons .btn-group {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    .sort-buttons .btn {
+        border: none;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    .sort-buttons .btn:hover {
+        background: var(--bs-primary);
+        color: white;
+    }
+    .sort-buttons .btn.active {
+        background: var(--bs-primary);
+        color: white;
+    }
+    @media (max-width: 768px) {
+        .catalogue-container {
+            padding: 1rem;
+        }
+
+        .catalogue-title {
+            font-size: 1.5rem;
+        }
+
+        .sort-buttons {
+            flex-wrap: wrap;
+        }
+
+        .sort-buttons .btn-group {
+            width: 100%;
+        }
+
+        .sort-buttons .btn {
+            flex: 1;
+            white-space: nowrap;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Mobile Filters Styles */
+    .mobile-filters-wrapper {
+        position: sticky;
+        top: 1rem;
+        z-index: 1020;
+    }
+
+    .filter-toggle {
+        border-radius: 1rem;
+        padding: 0.75rem;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+    }
+
+    .offcanvas {
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    .offcanvas-header {
+        padding: 1rem 1.5rem;
+        border-bottom-color: var(--table-border);
+    }
+
+    .offcanvas-body {
+        padding: 1rem;
+    }
+
+    .accordion-item {
+        background-color: var(--card-bg);
+        border-color: var(--table-border);
+    }
+
+    .accordion-button {
+        padding: 1rem;
+        font-weight: 500;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: var(--primary-color);
+    }
+
+    .accordion-button::after {
+        background-color: var(--text-color);
+        border-radius: 50%;
+        background-size: 75%;
+    }
+
+    .accordion-body {
+        padding: 1rem;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+    }
+
+    .filter-chip {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        border-radius: 2rem;
+        white-space: nowrap;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border-color: var(--table-border);
+    }
+
+    .filter-btn {
+        padding: 0.75rem 1rem;
+        border-radius: 0.75rem;
+        font-size: 0.9rem;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        border-color: var(--table-border);
+    }
+
+    .filter-chip:hover,
+    .filter-btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    /* Active state for filters */
+    .filter-chip.active,
+    .filter-btn.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    /* Form controls in dark theme */
+    .accordion-body .form-control {
+        background-color: var(--input-bg);
+        color: var(--text-color);
+        border-color: var(--input-border);
+    }
+
+    .accordion-body .form-control:focus {
+        border-color: var(--input-focus);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    /* Custom scrollbar for the offcanvas body */
+    .offcanvas-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .offcanvas-body::-webkit-scrollbar-track {
+        background: var(--background-color);
+        border-radius: 3px;
+    }
+
+    .offcanvas-body::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 3px;
+    }
+
+    .offcanvas-body::-webkit-scrollbar-thumb:hover {
+        background: var(--accent);
+    }
+
+    /* Dark theme specific adjustments */
+    body.dark-theme .offcanvas {
+        background-color: var(--card-bg);
+    }
+
+    body.dark-theme .accordion-button::after {
+        filter: invert(1);
+    }
+
+    body.dark-theme .btn-close {
+        filter: invert(1);
     }
 </style>
 {% endblock %} 

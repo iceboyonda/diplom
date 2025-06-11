@@ -1,47 +1,650 @@
 {% extends 'base.html' %}
-{% block title %}Админ — Диски{% endblock %}
+{% block title %}Управление дисками{% endblock %}
+
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Товары (диски)</h2>
-        <a href="{% url 'tyres:admin_rim_add' %}" class="btn btn-success">+ Добавить диск</a>
+<div class="admin-dashboard">
+    <!-- Боковая навигация -->
+    <div class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <h3>TyreTrust</h3>
+            <span>Админ-панель</span>
+        </div>
+        <nav class="admin-nav">
+            <a href="{% url 'accounts:admin_panel' %}" class="admin-nav-link">
+                <i class="fas fa-home"></i>
+                <span>Обзор</span>
+            </a>
+            <a href="{% url 'tyres:admin_tyres' %}" class="admin-nav-link">
+                <i class="fas fa-circle-notch"></i>
+                <span>Шины</span>
+            </a>
+            <a href="{% url 'tyres:admin_rims' %}" class="admin-nav-link active">
+                <i class="fas fa-compact-disc"></i>
+                <span>Диски</span>
+            </a>
+            <a href="{% url 'accounts:admin_users' %}" class="admin-nav-link">
+                <i class="fas fa-users"></i>
+                <span>Пользователи</span>
+            </a>
+            <a href="{% url 'orders:admin_orders' %}" class="admin-nav-link">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Заказы</span>
+            </a>
+        </nav>
     </div>
-    <div class="card shadow bg-dark text-light">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle mb-0">
+
+    <!-- Основной контент -->
+    <div class="admin-content">
+        <div class="admin-header">
+            <h1 class="admin-title">Управление дисками</h1>
+            <div class="admin-actions">
+                <div class="search-box">
+                    <form method="GET" action="{% url 'tyres:admin_rims' %}" class="d-flex">
+                        <input type="text" name="q" class="form-control" placeholder="Поиск дисков..." value="{{ request.GET.q|default:'' }}">
+                        <button type="submit" class="btn btn-primary ms-2">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+                <a href="{% url 'tyres:add_rim' %}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Добавить диск
+                </a>
+            </div>
+        </div>
+
+        <!-- Фильтры -->
+        <div class="admin-section mb-4">
+            <div class="filters-container">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Бренд</label>
+                        <select class="form-select filter-select" data-filter="brand">
+                            <option value="">Все бренды</option>
+                            {% for brand in brands %}
+                                <option value="{{ brand }}">{{ brand }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Диаметр</label>
+                        <select class="form-select filter-select" data-filter="diameter">
+                            <option value="">Все диаметры</option>
+                            {% for diameter in diameters %}
+                                <option value="{{ diameter }}">{{ diameter }}"</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Материал</label>
+                        <select class="form-select filter-select" data-filter="material">
+                            <option value="">Все материалы</option>
+                            <option value="alloy">Литые</option>
+                            <option value="steel">Стальные</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Сортировка</label>
+                        <select class="form-select" id="sortSelect">
+                            <option value="price-asc">Цена: по возрастанию</option>
+                            <option value="price-desc">Цена: по убыванию</option>
+                            <option value="name-asc">Название: А-Я</option>
+                            <option value="name-desc">Название: Я-А</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Таблица дисков -->
+        <div class="admin-section">
+            <div class="table-container">
+                <table class="admin-table products-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Бренд</th>
-                            <th>Название</th>
-                            <th>Диаметры</th>
-                            <th>Мин. цена</th>
-                            <th>Кол-во вариантов</th>
-                            <th></th>
+                            <th>Изображение</th>
+                            <th>Наименование</th>
+                            <th>Размеры</th>
+                            <th>Материал</th>
+                            <th>Цена</th>
+                            <th>Наличие</th>
+                            <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for rim in rims %}
                         <tr>
-                            <td>{{ rim.id }}</td>
-                            <td>{{ rim.brand }}</td>
-                            <td>{{ rim.name }}</td>
-                            <td>{{ rim.diameter_display|default:'—' }}</td>
-                            <td>{% if rim.min_price %}{{ rim.min_price }} ₽{% else %}—{% endif %}</td>
-                            <td>{{ rim.variants.count }}</td>
-                            <td class="text-end">
-                                <a href="{% url 'tyres:admin_rim_edit' rim.id %}" class="btn btn-sm btn-primary">Редактировать</a>
-                                <a href="{% url 'tyres:admin_rim_delete' rim.id %}" class="btn btn-sm btn-danger">Удалить</a>
+                            <td>
+                                <div class="product-image">
+                                    <img src="{{ rim.image.url }}" alt="{{ rim.brand }} {{ rim.model }}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="product-name">
+                                    <h6 class="mb-1">{{ rim.brand }} {{ rim.model }}</h6>
+                                    <span class="product-id">#{{ rim.id }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="product-specs">
+                                    <span>{{ rim.width }}x{{ rim.diameter }} ET{{ rim.et }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="material-badge 
+                                {% if rim.material == 'alloy' %}badge-alloy
+                                {% else %}badge-steel{% endif %}">
+                                    {{ rim.get_material_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="product-price">
+                                    <span>{{ rim.price }} ₽</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="stock-badge {% if rim.stock > 0 %}badge-in-stock{% else %}badge-out-of-stock{% endif %}">
+                                    {% if rim.stock > 0 %}В наличии ({{ rim.stock }}){% else %}Нет в наличии{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'tyres:rim_detail' rim.id %}" class="btn btn-sm btn-outline-primary" title="Просмотр">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'tyres:edit_rim' rim.id %}" class="btn btn-sm btn-outline-secondary" title="Редактировать">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'tyres:delete_rim' rim.id %}" class="btn btn-sm btn-outline-danger" title="Удалить">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% empty %}
-                        <tr><td colspan="7" class="text-center text-secondary">Дисков пока нет</td></tr>
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <div class="empty-state">
+                                    <i class="fas fa-compact-disc mb-3"></i>
+                                    <p>Диски не найдены</p>
+                                    <a href="{% url 'tyres:add_rim' %}" class="btn btn-primary mt-3">
+                                        <i class="fas fa-plus me-2"></i>Добавить диск
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            
+            {% if rims.paginator.num_pages > 1 %}
+            <div class="pagination-container mt-4">
+                <nav aria-label="Навигация по страницам">
+                    <ul class="pagination justify-content-center">
+                        {% if rims.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="В начало">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ rims.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Предыдущая">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="В начало">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Предыдущая">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for i in rims.paginator.page_range %}
+                            {% if rims.number == i %}
+                                <li class="page-item active"><a class="page-link" href="#">{{ i }}</a></li>
+                            {% elif i > rims.number|add:'-3' and i < rims.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ i }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+                                        {{ i }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if rims.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ rims.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="Следующая">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ rims.paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" aria-label="В конец">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Следующая">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="В конец">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<style>
+/* Базовые стили для админ-панели */
+.admin-dashboard {
+    display: flex;
+    min-height: calc(100vh - 72px);
+    background-color: var(--background-color);
+}
+
+/* Боковое меню */
+.admin-sidebar {
+    width: 250px;
+    background: var(--card-bg);
+    padding: 1.5rem 1rem;
+    position: sticky;
+    top: 72px;
+    height: calc(100vh - 72px);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    z-index: 10;
+    transition: all 0.3s;
+    border-right: 1px solid rgba(0,0,0,0.05);
+}
+
+.admin-sidebar-header {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.admin-sidebar-header h3 {
+    margin: 0;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.admin-sidebar-header span {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.admin-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: all 0.2s;
+}
+
+.admin-nav-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.admin-nav-link:hover {
+    background-color: rgba(0,0,0,0.05);
+    color: var(--primary-color);
+}
+
+.admin-nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Основное содержимое */
+.admin-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.admin-title {
+    margin: 0;
+    font-weight: 700;
+}
+
+.admin-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Поиск */
+.search-box {
+    display: flex;
+    min-width: 300px;
+}
+
+.search-box .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.search-box .btn {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Секции */
+.admin-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Фильтры */
+.filters-container {
+    padding: 0.5rem;
+}
+
+/* Таблица */
+.table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    vertical-align: middle;
+}
+
+.admin-table thead th {
+    background-color: rgba(0,0,0,0.02);
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.8rem 1rem;
+}
+
+.admin-table tbody tr:hover {
+    background-color: rgba(0,0,0,0.02);
+}
+
+/* Продукт */
+.product-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: rgba(0,0,0,0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.product-id {
+    font-size: 0.8rem;
+    color: var(--secondary-text);
+}
+
+.product-specs {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.product-price {
+    font-weight: 600;
+}
+
+/* Бэйджи */
+.material-badge,
+.stock-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.badge-alloy {
+    background-color: #e6f7ff;
+    color: #0070f3;
+}
+
+.badge-steel {
+    background-color: #f9f0ff;
+    color: #722ed1;
+}
+
+.badge-in-stock {
+    background-color: #f6ffed;
+    color: #52c41a;
+}
+
+.badge-out-of-stock {
+    background-color: #fff1f0;
+    color: #f5222d;
+}
+
+/* Пустое состояние */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--secondary-text);
+}
+
+.empty-state i {
+    font-size: 2.5rem;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    margin-bottom: 0;
+}
+
+/* Пагинация */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+}
+
+.pagination .page-link {
+    border-radius: 4px;
+    margin: 0 2px;
+    color: var(--text-color);
+    border-color: rgba(0,0,0,0.1);
+}
+
+.pagination .page-link:focus {
+    box-shadow: none;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+/* Темная тема */
+body.dark-theme .admin-sidebar {
+    background-color: #1e1e2c;
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+
+body.dark-theme .admin-nav-link:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+body.dark-theme .admin-section {
+    background-color: #1e1e2c;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+body.dark-theme .admin-table th {
+    background-color: rgba(255,255,255,0.03);
+}
+
+body.dark-theme .admin-table td {
+    border-color: rgba(255,255,255,0.05);
+}
+
+body.dark-theme .admin-table tbody tr:hover {
+    background-color: rgba(255,255,255,0.03);
+}
+
+body.dark-theme .product-image {
+    background-color: rgba(255,255,255,0.1);
+}
+
+body.dark-theme .pagination .page-link {
+    background-color: #1e1e2c;
+    border-color: rgba(255,255,255,0.1);
+}
+
+/* Адаптивность */
+@media (max-width: 992px) {
+    .admin-dashboard {
+        flex-direction: column;
+    }
+    
+    .admin-sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        top: 0;
+        padding: 1rem;
+    }
+    
+    .admin-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .admin-nav-link {
+        padding: 0.5rem;
+    }
+    
+    .admin-nav-link span {
+        display: none;
+    }
+    
+    .admin-nav-link i {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+    
+    .admin-sidebar-header {
+        display: none;
+    }
+    
+    .admin-content {
+        padding: 1rem;
+    }
+    
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .admin-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        width: 100%;
+    }
+    
+    .admin-section {
+        padding: 1rem;
+    }
+    
+    .admin-table td, 
+    .admin-table th {
+        padding: 0.75rem;
+    }
+    
+    .product-specs {
+        display: none;
+    }
+    
+    .table-container {
+        margin: 0 -1rem;
+        width: calc(100% + 2rem);
+        border-radius: 0;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Фильтрация по селектам
+    const filterSelects = document.querySelectorAll('.filter-select');
+    filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            applyFilters();
+        });
+    });
+    
+    // Сортировка
+    const sortSelect = document.getElementById('sortSelect');
+    sortSelect.addEventListener('change', function() {
+        applyFilters();
+    });
+    
+    function applyFilters() {
+        // Здесь можно добавить логику фильтрации на стороне клиента
+        // или отправить форму для серверной фильтрации
+        console.log('Применяем фильтры');
+    }
+});
+</script>
 {% endblock %} 

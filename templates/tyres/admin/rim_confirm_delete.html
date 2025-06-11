@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Удалить диск{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h1 class="card-title mb-4">Удалить диск</h1>
+            
+            <p class="mb-4">Вы уверены, что хотите удалить диск "{{ rim.brand }} {{ rim.name }}"?</p>
+            
+            <form method="post">
+                {% csrf_token %}
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'tyres:admin_rims' %}" class="btn btn-secondary">Отмена</a>
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

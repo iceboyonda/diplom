@@ -1,0 +1,156 @@
+<!-- Desktop Quick Filters -->
+<div class="quick-filters mb-4 d-none d-md-block">
+    <div class="d-flex flex-wrap gap-2">
+        <!-- Популярные диаметры -->
+        <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Диаметр
+            </button>
+            <ul class="dropdown-menu">
+                {% for diameter in popular_diameters %}
+                    <li>
+                        <a class="dropdown-item" 
+                           href="?diameter={{ diameter }}{{ query_string }}"
+                           hx-get="?diameter={{ diameter }}{{ query_string }}"
+                           hx-target="#rims-list"
+                           hx-push-url="true"
+                           hx-indicator="#loading-indicator">
+                            {{ diameter }}″
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Популярные типы крепления -->
+        <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Крепление
+            </button>
+            <ul class="dropdown-menu">
+                {% for pattern in popular_bolt_patterns %}
+                    <li>
+                        <a class="dropdown-item" 
+                           href="?bolt_pattern={{ pattern }}{{ query_string }}"
+                           hx-get="?bolt_pattern={{ pattern }}{{ query_string }}"
+                           hx-target="#rims-list"
+                           hx-push-url="true"
+                           hx-indicator="#loading-indicator">
+                            {{ pattern }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Популярные бренды -->
+        <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Бренд
+            </button>
+            <ul class="dropdown-menu">
+                {% for brand in popular_brands %}
+                    <li>
+                        <a class="dropdown-item" 
+                           href="?brand={{ brand }}{{ query_string }}"
+                           hx-get="?brand={{ brand }}{{ query_string }}"
+                           hx-target="#rims-list"
+                           hx-push-url="true"
+                           hx-indicator="#loading-indicator">
+                            {{ brand }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Ценовые категории -->
+        <div class="dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Цена
+            </button>
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="dropdown-item" 
+                       href="?min_price=0&max_price=10000{{ query_string }}"
+                       hx-get="?min_price=0&max_price=10000{{ query_string }}"
+                       hx-target="#rims-list"
+                       hx-push-url="true"
+                       hx-indicator="#loading-indicator">
+                        До 10 000 ₽
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" 
+                       href="?min_price=10000&max_price=30000{{ query_string }}"
+                       hx-get="?min_price=10000&max_price=30000{{ query_string }}"
+                       hx-target="#rims-list"
+                       hx-push-url="true"
+                       hx-indicator="#loading-indicator">
+                        10 000 - 30 000 ₽
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" 
+                       href="?min_price=30000{{ query_string }}"
+                       hx-get="?min_price=30000{{ query_string }}"
+                       hx-target="#rims-list"
+                       hx-push-url="true"
+                       hx-indicator="#loading-indicator">
+                        От 30 000 ₽
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+.quick-filters {
+    background: var(--card-bg);
+    padding: 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.quick-filters .btn {
+    border-radius: 0.75rem;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.quick-filters .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+}
+
+.quick-filters .dropdown-menu {
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: none;
+    padding: 0.5rem;
+}
+
+.quick-filters .dropdown-item {
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
+}
+
+.quick-filters .dropdown-item:hover {
+    background: var(--bs-primary);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .quick-filters {
+        padding: 0.75rem;
+    }
+    
+    .quick-filters .btn {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+</style> 

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Избранное{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Избранное</h1>
+
+    {% if tyre_favourites or rim_favourites %}
+        {% if tyre_favourites %}
+            <h2 class="mb-3">Избранные шины</h2>
+            <div class="row">
+                {% for tyre in tyre_favourites %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            {% if tyre.model.image %}
+                                <img src="{{ tyre.model.image.url }}" class="card-img-top" alt="{{ tyre.model.brand }} {{ tyre.model.name }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ tyre.model.brand }} {{ tyre.model.name }}</h5>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        Радиус: R{{ tyre.radius }}<br>
+                                        Сезон: {{ tyre.get_season_display }}<br>
+                                        Цена: {{ tyre.price }} ₽
+                                    </small>
+                                </p>
+                                <a href="{% url 'tyres:tyre_detail' tyre.model.id %}" class="btn btn-primary">Подробнее</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if rim_favourites %}
+            <h2 class="mb-3 mt-4">Избранные диски</h2>
+            <div class="row">
+                {% for rim in rim_favourites %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            {% if rim.model.image %}
+                                <img src="{{ rim.model.image.url }}" class="card-img-top" alt="{{ rim.model.brand }} {{ rim.model.name }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ rim.model.brand }} {{ rim.model.name }}</h5>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        Диаметр: {{ rim.diameter }}<br>
+                                        Ширина: {{ rim.width }}<br>
+                                        Разболтовка: {{ rim.bolt_pattern }}<br>
+                                        Цена: {{ rim.price }} ₽
+                                    </small>
+                                </p>
+                                <a href="{% url 'tyres:rim_detail' rim.model.id %}" class="btn btn-primary">Подробнее</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info">
+            У вас пока нет избранных товаров. Перейдите в <a href="{% url 'tyres:catalogue' %}">каталог</a>, чтобы добавить товары в избранное.
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 

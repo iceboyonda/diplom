@@ -1,97 +1,59 @@
 {% extends 'base.html' %}
 
-{% block title %}Избранное - Tyre Trust{% endblock %}
+{% block title %}Избранное{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-4">
     <h1 class="mb-4">Избранное</h1>
-
-    <h2>Избранные шины</h2>
-    {% if favourite_tyre_variants %}
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Модель</th>
-                <th>Размер</th>
-                <th>Цена</th>
-                <th>В наличии</th>
-                <th>Количество</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for variant in favourite_tyre_variants %}
-            <tr>
-                <td>{{ variant.model.brand }} {{ variant.model.name }}</td>
-                <td>{{ variant.width }}/{{ variant.profile }} R{{ variant.radius }}</td>
-                <td>{{ variant.price|floatformat:0 }} ₽</td>
-                <td>{% if variant.stock > 0 %}{{ variant.stock }} шт.{% else %}Нет в наличии{% endif %}</td>
-                <td>
-                    <div class="d-flex flex-column gap-2">
-                         {% if variant.stock > 0 %}
-                        <form action="{% url 'cart:add' variant.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="number" name="quantity" value="1" min="1" max="{{ variant.stock }}" class="form-control form-control-sm mb-1" style="width: 80px;">
-                            <button type="submit" class="btn btn-primary btn-sm">В корзину</button>
-                        </form>
-                        {% else %}
-                        <span class="text-danger">Нет в наличии</span>
-                        {% endif %}
-                        <form action="{% url 'tyres:remove_favourite' variant.id %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm">Убрать из избранного</button>
-                        </form>
+    
+    {% if tyre_favourites or rim_favourites %}
+        {% if tyre_favourites %}
+            <h2 class="mb-3">Шины</h2>
+            <div class="row">
+                {% for tyre in tyre_favourites %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            {% if tyre.image %}
+                                <img src="{{ tyre.image.url }}" class="card-img-top" alt="{{ tyre.model.brand }} {{ tyre.model.name }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ tyre.model.brand }} {{ tyre.model.name }}</h5>
+                                <p class="card-text small">
+                                    {{ tyre.width }}/{{ tyre.profile }} R{{ tyre.radius }} {{ tyre.get_season_display }} - {{ tyre.price }} ₽
+                                </p>
+                                <a href="{% url 'tyres:tyre_detail' tyre.model.id %}" class="btn btn-primary btn-sm">Подробнее</a>
+                            </div>
+                        </div>
                     </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <div class="alert alert-info">У вас нет избранных шин.</div>
-    {% endif %}
-
-    <h2 class="mt-5">Избранные диски</h2>
-    {% if favourite_rim_variants %}
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Модель</th>
-                <th>Параметры</th>
-                <th>Цена</th>
-                <th>В наличии</th>
-                <th>Количество</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for variant in favourite_rim_variants %}
-            <tr>
-                <td>{{ variant.model.brand }} {{ variant.model.name }}</td>
-                <td>{{ variant.diameter|floatformat:1 }}x{{ variant.width|floatformat:1 }}</td>
-                <td>{{ variant.price|floatformat:0 }} ₽</td>
-                 <td>{% if variant.stock > 0 %}{{ variant.stock }} шт.{% else %}Нет в наличии{% endif %}</td>
-                <td>
-                    <div class="d-flex flex-column gap-2">
-                        {% if variant.stock > 0 %}
-                        <form action="{% url 'cart:add_rim' variant.id %}" method="post">
-                            {% csrf_token %}
-                            <input type="number" name="quantity" value="1" min="1" max="{{ variant.stock }}" class="form-control form-control-sm mb-1" style="width: 80px;">
-                            <button type="submit" class="btn btn-primary btn-sm">В корзину</button>
-                        </form>
-                        {% else %}
-                        <span class="text-danger">Нет в наличии</span>
-                        {% endif %}
-                        <form action="{% url 'tyres:remove_favourite_rim' variant.id %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm">Убрать из избранного</button>
-                        </form>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% if rim_favourites %}
+            <h2 class="mb-3 mt-4">Диски</h2>
+            <div class="row">
+                {% for rim in rim_favourites %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            {% if rim.image %}
+                                <img src="{{ rim.image.url }}" class="card-img-top" alt="{{ rim.model.brand }} {{ rim.model.name }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ rim.model.brand }} {{ rim.model.name }}</h5>
+                                <p class="card-text small">
+                                    {{ rim.diameter }}x{{ rim.width }}, {{ rim.bolt_pattern }} - {{ rim.price }} ₽
+                                </p>
+                                <a href="{% url 'tyres:rim_detail' rim.model.id %}" class="btn btn-primary btn-sm">Подробнее</a>
+                            </div>
+                        </div>
                     </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                {% endfor %}
+            </div>
+        {% endif %}
     {% else %}
-    <div class="alert alert-info">У вас нет избранных дисков.</div>
+        <div class="alert alert-info">
+            У вас пока нет избранных товаров.
+        </div>
     {% endif %}
 </div>
 {% endblock %} 

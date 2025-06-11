@@ -5,6 +5,9 @@ from django.contrib import messages
 from .forms import UserRegistrationForm, UserLoginForm, UserEditForm
 from orders.models import Order
 from django import forms
+from django.utils import timezone
+from datetime import timedelta
+from tyres.models import TyreModel, RimModel
 
 def register(request):
     if request.method == 'POST':
@@ -54,7 +57,27 @@ def user_logout(request):
 
 @user_passes_test(lambda u: u.is_staff or u.is_superuser)
 def admin_panel(request):
-    return render(request, 'accounts/admin_panel.html')
+    # Получаем статистику для админ-панели
+    User = get_user_model()
+    
+    # Счетчики для карточек статистики
+    tyre_count = TyreModel.objects.count()
+    rim_count = RimModel.objects.count()
+    user_count = User.objects.count()
+    order_count = Order.objects.count()
+    
+    # Получаем последние заказы для таблицы
+    recent_orders = Order.objects.all().select_related('user').order_by('-created')[:5]
+    
+    context = {
+        'tyre_count': tyre_count,
+        'rim_count': rim_count,
+        'user_count': user_count,
+        'order_count': order_count,
+        'recent_orders': recent_orders,
+    }
+    
+    return render(request, 'accounts/admin_panel.html', context)
 
 @user_passes_test(lambda u: u.is_staff)
 def admin_users(request):

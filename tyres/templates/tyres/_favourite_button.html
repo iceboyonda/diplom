@@ -1,0 +1,23 @@
+{% comment %}
+    Шаблон кнопки "Избранное" для вариантов шин.
+    Ожидает контекст: 'variant' (объект TyreVariant) и 'favourite_ids' (список ID избранных вариантов).
+{% endcomment %}
+<form hx-post="{% url 'tyres:add_to_favourites' variant.id %}" 
+      hx-target="#favourite-icon-tyre-{{ variant.id }}" 
+      hx-swap="outerHTML" 
+      hx-indicator="#favourite-spinner-tyre-{{ variant.id }}"
+      hx-on::after-request="if(event.detail.failed) { alert('Ошибка при добавлении в избранное'); }"
+      class="d-flex align-items-center">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-link p-0 text-danger favourite-heart-icon" 
+            title="{% if variant.id in favourite_ids %}Удалить из избранного{% else %}Добавить в избранное{% endif %}">
+        <span id="favourite-icon-tyre-{{ variant.id }}">
+            {% if variant.id in favourite_ids %}
+                <i class="fas fa-heart"></i> {# Full heart icon #}
+            {% else %}
+                <i class="far fa-heart"></i> {# Empty heart icon #}
+            {% endif %}
+        </span>
+    </button>
+    <span id="favourite-spinner-tyre-{{ variant.id }}" class="spinner-border spinner-border-sm htmx-indicator ms-2" role="status" aria-hidden="true"></span>
+</form> 

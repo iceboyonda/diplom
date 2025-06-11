@@ -1,0 +1,64 @@
+{% if rims %}
+    <div class="row">
+        {% for rim in rims %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    {% if rim.image %}
+                        <img src="{{ rim.image.url }}" class="card-img-top" alt="{{ rim.brand }} {{ rim.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ rim.brand }} {{ rim.name }}</h5>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Диаметр: {{ rim.diameter_display }}<br>
+                                Ширина: {{ rim.width_display }}<br>
+                                Разболтовка: {{ rim.bolt_patterns_display }}<br>
+                                {% if rim.min_price %}
+                                    Цена от: {{ rim.min_price }} ₽
+                                {% endif %}
+                            </small>
+                        </p>
+                        <a href="{% url 'tyres:rim_detail' rim.id %}" class="btn btn-primary">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    {% if page_obj.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if query_string %}&{{ query_string }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% else %}
+    <div class="alert alert-info">
+        По вашему запросу ничего не найдено. Попробуйте изменить параметры фильтрации.
+    </div>
+{% endif %} 

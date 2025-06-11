@@ -3,70 +3,56 @@
 {% block title %}Каталог шин - Tyre Trust{% endblock %}
 
 {% block content %}
+<div class="catalogue-container">
     <!-- Баннер с акцией -->
     {# Удаляем баннер с акцией #}
 
     <!-- Секция с преимуществами -->
-    <div class="features-section">
+    <div class="container mt-4 mb-5">
         <div class="row">
-            <div class="col-md-3">
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-truck"></i></div>
-                    <h5>Быстрая доставка</h5>
-                    <p>Доставляем в течение 1-2 дней по всей России</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-check-circle"></i></div>
-                    <h5>Гарантия качества</h5>
-                    <p>Все товары проходят тщательную проверку</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-tags"></i></div>
-                    <h5>Лучшие цены</h5>
-                    <p>Регулярные акции и специальные предложения</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="feature-item">
-                    <div class="feature-icon"><i class="fas fa-tools"></i></div>
-                    <h5>Профессиональная установка</h5>
-                    <p>Сеть сервисных центров по всей стране</p>
+            <div class="col-12">
+                <div class="feature-container">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="feature-item-v3">
+                                <i class="fas fa-truck feature-icon-v3"></i>
+                                <h5 class="mt-3">Быстрая доставка</h5>
+                                <p>Доставляем в течение 1-2 дней по всей России</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-item-v3">
+                                <i class="fas fa-check-circle feature-icon-v3"></i>
+                                <h5 class="mt-3">Гарантия качества</h5>
+                                <p>Все товары проходят тщательную проверку</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="feature-item-v3">
+                                <i class="fas fa-tags feature-icon-v3"></i>
+                                <h5 class="mt-3">Лучшие цены</h5>
+                                <p>Мы стараемся поддерживать оптимальное соотношение цены и качества</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Популярные категории -->
-    <div class="categories-section">
-        <h3 class="mb-4">Популярные категории</h3>
+    <div class="container mb-5">
+        <h3 class="mb-4 text-center">Популярные категории</h3>
         <div class="row justify-content-center">
-            <div class="col-md-6 d-flex justify-content-center">
-                <button 
-                    class="category-card category-card-custom w-100"
-                    style="max-width: 500px; height: 80px; border: none; outline: none; cursor: pointer; margin-bottom: 2rem;"
-                    hx-get="{% url 'tyres:catalogue' %}?season=summer"
-                    hx-target="#tyres-list"
-                    hx-trigger="click"
-                    hx-push-url="true"
-                    hx-indicator="#loading-indicator"
-                >
-                    <span class="category-title">Летние шины</span>
-                </button>
+            <div class="col-md-6">
+                <a href="{% url 'tyres:catalogue' %}?season=summer" class="category-link-gradient">
+                    Летние шины
+                </a>
             </div>
+            {# Можно добавить больше категорий по аналогии #}
         </div>
     </div>
 
-    <!-- Существующий контент каталога -->
-    <h2 class="catalog-title">Каталог шин</h2>
-    <div class="row mb-3">
-        <div class="col text-end">
-            <a href="{% url 'tyres:faq' %}" class="btn btn-outline-info">FAQ: Как выбрать шины?</a>
-        </div>
-    </div>
     <div class="row">
         <!-- Фильтры -->
         <div class="col-md-3">
@@ -78,20 +64,19 @@
                     <form action="{% url 'tyres:catalogue' %}" method="get" 
                           hx-get="{% url 'tyres:catalogue' %}" 
                           hx-target="#tyres-list" 
+                          hx-swap="innerHTML"
                           hx-trigger="change, submit"
                           hx-push-url="true"
                           hx-indicator="#loading-indicator"
                           hx-on--after-request="this.form.reset()">
-                        {# Удаляем поле поиска по названию для шин #}
-                        {# <div class="mb-3"><input type="text" name="q" class="form-control border-secondary" placeholder="Поиск по названию..." value="{{ request.GET.q }}"></div> #}
 
                         <!-- Бренд -->
                         <div class="mb-3">
                             <label class="form-label">Бренд</label>
-                            <select name="brand" class="form-select border-secondary">
+                            <select name="brand" class="form-select">
                                 <option value="">Все бренды</option>
-                                {% for brand in brands %}
-                                    <option value="{{ brand }}">{{ brand }}</option>
+                                {% for brand_option in brands %}
+                                    <option value="{{ brand_option }}" {% if selected_brand == brand_option %}selected{% endif %}>{{ brand_option }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -99,10 +84,10 @@
                         <!-- Ширина -->
                         <div class="mb-3">
                             <label class="form-label">Ширина</label>
-                            <select name="width" class="form-select border-secondary">
+                            <select name="width" class="form-select">
                                 <option value="">Любая</option>
-                                {% for width in widths %}
-                                    <option value="{{ width }}">{{ width }}</option>
+                                {% for width_option in widths %}
+                                    <option value="{{ width_option }}" {% if selected_width|stringformat:"s" == width_option|stringformat:"s" %}selected{% endif %}>{{ width_option }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -110,10 +95,10 @@
                         <!-- Профиль -->
                         <div class="mb-3">
                             <label class="form-label">Профиль</label>
-                            <select name="profile" class="form-select border-secondary">
+                            <select name="profile" class="form-select">
                                 <option value="">Любой</option>
-                                {% for profile in profiles %}
-                                    <option value="{{ profile }}">{{ profile }}</option>
+                                {% for profile_option in profiles %}
+                                    <option value="{{ profile_option }}" {% if selected_profile|stringformat:"s" == profile_option|stringformat:"s" %}selected{% endif %}>{{ profile_option }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -121,10 +106,10 @@
                         <!-- Радиус -->
                         <div class="mb-3">
                             <label class="form-label">Радиус</label>
-                            <select name="radius" class="form-select border-secondary">
+                            <select name="radius" class="form-select">
                                 <option value="">Любой</option>
-                                {% for radius in radiuses %}
-                                    <option value="{{ radius }}">R{{ radius }}</option>
+                                {% for radius_option in radiuses %}
+                                    <option value="{{ radius_option }}" {% if selected_radius|stringformat:"s" == radius_option|stringformat:"s" %}selected{% endif %}>R{{ radius_option }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -132,10 +117,10 @@
                         <!-- Сезон -->
                         <div class="mb-3">
                             <label class="form-label">Сезон</label>
-                            <select name="season" class="form-select border-secondary">
+                            <select name="season" class="form-select">
                                 <option value="">Любой</option>
                                 {% for key, value in seasons.items %}
-                                    <option value="{{ key }}">{{ value }}</option>
+                                    <option value="{{ key }}" {% if selected_season == key %}selected{% endif %}>{{ value }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -143,7 +128,7 @@
                         <!-- Шипы -->
                         <div class="mb-3">
                             <div class="form-check">
-                                <input type="checkbox" name="studded" class="form-check-input" id="studded">
+                                <input type="checkbox" name="studded" class="form-check-input" id="studded" {% if request.GET.studded == 'on' %}checked{% endif %}>
                                 <label class="form-check-label" for="studded">Шипованные</label>
                             </div>
                         </div>
@@ -152,29 +137,45 @@
                         <div class="mb-3">
                             <label class="form-label">Цена</label>
                             <div class="input-group mb-2">
-                                <input type="number" name="min_price" class="form-control border-secondary" placeholder="От">
-                                <input type="number" name="max_price" class="form-control border-secondary" placeholder="До">
+                                <input type="number" name="min_price" class="form-control" placeholder="От" value="{{ min_price|default_if_none:'' }}">
+                                <input type="number" name="max_price" class="form-control" placeholder="До" value="{{ max_price|default_if_none:'' }}">
                             </div>
                         </div>
 
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary w-100">Применить</button>
                             <a href="{% url 'tyres:catalogue' %}" 
-                               class="btn btn-secondary w-100" 
-                               hx-get="{% url 'tyres:catalogue' %}" 
-                               hx-target="#tyres-list" 
-                               hx-push-url="true"
-                               hx-indicator="#loading-indicator"
-                               hx-on--after-request="resetTyreFilters(this.form)">Сбросить</a>
+                               class="btn btn-secondary w-100">Сбросить</a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-
         <!-- Список шин -->
         <div class="col-md-9">
-            <!-- Индикатор загрузки -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="catalogue-title">Каталог шин</h1>
+                <div class="sort-buttons">
+                    <div class="btn-group" role="group">
+                        <a href="?sort=price_asc{{ query_string }}" 
+                           class="btn btn-outline-secondary {% if current_sort == 'price_asc' %}active{% endif %}"
+                           hx-get="?sort=price_asc{{ query_string }}"
+                           hx-target="#tyres-list"
+                           hx-push-url="true"
+                           hx-indicator="#loading-indicator">
+                            По цене ↑
+                        </a>
+                        <a href="?sort=price_desc{{ query_string }}" 
+                           class="btn btn-outline-secondary {% if current_sort == 'price_desc' %}active{% endif %}"
+                           hx-get="?sort=price_desc{{ query_string }}"
+                           hx-target="#tyres-list"
+                           hx-push-url="true"
+                           hx-indicator="#loading-indicator">
+                            По цене ↓
+                        </a>
+                    </div>
+                </div>
+            </div>
             <div id="loading-indicator" class="htmx-indicator text-center">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Загрузка...</span>
@@ -185,71 +186,195 @@
             </div>
         </div>
     </div>
+</div>
+<style>
+.catalogue-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-left: 32px;
+    padding-right: 32px;
+}
+@media (max-width: 1200px) {
+    .catalogue-container {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+}
+.catalogue-title {
+    margin-bottom: 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-color);
+    text-align: left;
+    padding-bottom: 0;
+    line-height: 1.1;
+}
+.fade-transition {
+    transition: opacity 0.3s ease-in-out;
+}
+.htmx-request .fade-transition {
+    opacity: 0.5;
+}
+/* NEW STYLES */
+.feature-container {
+    background: linear-gradient(to right, #1A2980, #6A3093);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
 
-    <style>
-        .fade-transition {
-            transition: opacity 0.3s ease-in-out;
+.feature-item-v3 {
+    padding: 1.5rem 1rem;
+    color: white;
+    height: 100%;
+    transition: transform 0.3s ease;
+}
+
+.feature-item-v3:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon-v3 {
+    font-size: 3rem;
+    color: white;
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.feature-item-v3:hover .feature-icon-v3 {
+    transform: scale(1.1);
+}
+
+.feature-item-v3 p {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.category-link-gradient {
+    display: block;
+    padding: 2rem;
+    margin-bottom: 1rem;
+    border-radius: 16px;
+    background: linear-gradient(to right, #1A2980, #6A3093);
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.category-link-gradient:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+.filter-block {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    position: sticky;
+    top: 2rem;
+}
+.filter-block .form-label {
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+.filter-block .form-select,
+.filter-block .form-control {
+    border-radius: 8px;
+    border: 1px solid var(--table-border);
+    padding: 0.75rem;
+    background-color: var(--input-bg);
+    color: var(--text-color);
+}
+.filter-block .form-select:focus,
+.filter-block .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+.filter-block .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+.filter-block .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+.filter-block .btn:hover {
+    transform: translateY(-2px);
+}
+/* Dark theme improvements */
+body.dark-theme .feature-item-v2,
+body.dark-theme .category-link-v2,
+body.dark-theme .filter-block {
+    background: var(--card-bg);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+body.dark-theme .feature-item-v2:hover,
+body.dark-theme .category-link-v2:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+body.dark-theme .filter-block .form-select,
+body.dark-theme .filter-block .form-control {
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--text-color);
+}
+body.dark-theme .filter-block .form-select:focus,
+body.dark-theme .filter-block .form-control:focus {
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+}
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .feature-item-v2 {
+        padding: 1.5rem;
+    }
+    .category-link-v2 {
+        padding: 1.5rem;
+        font-size: 1rem;
+    }
+    .filter-block {
+        position: static;
+        margin-bottom: 2rem;
+    }
+    .catalogue-title {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Function to reset form and potentially trigger htmx GET
+    function resetTyreFilters(form) {
+        form.reset();
+        // Manually trigger a GET request after resetting for hx-push-url
+        htmx.trigger(form, 'change');
+    }
+
+    // Handle browser back/forward buttons with hx-push-url
+    window.addEventListener('popstate', function(event) {
+        // Check if the popstate event is triggered by htmx
+        if (!event.state || !event.state.htmx) {
+            // If not triggered by htmx, let the browser handle it
+            return;
         }
-        .htmx-request .fade-transition {
-            opacity: 0.5;
+
+        const url = event.state.htmx.url;
+        if (url) {
+            // Use htmx to load the content for the history entry
+            htmx.ajax('GET', url, { target:'#tyres-list' });
         }
-        .form-select:focus, .form-control:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
-        .card {
-            transition: transform 0.2s ease-in-out;
-        }
-        .card:hover {
-            transform: translateY(-2px);
-        }
-        .catalogue-title {
-            margin-bottom: 0.5rem;
-        }
-        .category-card-custom {
-            background: linear-gradient(90deg, #3973f7, #8e44ad);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 24px;
-            font-size: 1.8rem;
-            font-weight: 700;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-            transition: transform 0.2s, box-shadow 0.2s;
-            padding: 0;
-        }
-        .category-card-custom:hover {
-            transform: translateY(-4px) scale(1.03);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.18);
-        }
-        .category-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.25);
-            margin: 0;
-            letter-spacing: 1px;
-        }
-        .filter-block {
-            position: relative;
-            border-radius: 1.5rem !important;
-            background: var(--card-bg) !important;
-            z-index: 1;
-            overflow: hidden;
-            box-shadow: 0 2px 16px rgba(57, 115, 247, 0.08);
-        }
-        .filter-block::before {
-            content: "";
-            position: absolute;
-            top: -3px; left: -3px; right: -3px; bottom: -3px;
-            border-radius: 1.6rem;
-            background: linear-gradient(135deg, #00c3ff, #3973f7, #8e44ad, #ffb347);
-            z-index: -1;
-            pointer-events: none;
-        }
-        body.dark-theme .filter-block::before {
-            background: linear-gradient(135deg, #00eaff, #3973f7, #8e44ad, #ff6ec4);
-            box-shadow: 0 0 12px 2px #00c3ff55;
-        }
-    </style>
+    });
+
+</script>
 {% endblock %} 

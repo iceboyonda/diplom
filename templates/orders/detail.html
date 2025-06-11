@@ -54,32 +54,40 @@
             <div class="card-body">
                 {% for item in order.items.all %}
                     <div class="d-flex align-items-center mb-3">
-                        {% if item.tyre.image %}
-                            <div class="flex-shrink-0">
-                                <img src="{{ item.tyre.image.url }}" alt="{{ item.tyre.name }}" style="width: 100px;">
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h6 class="mb-0">{{ item.tyre.brand }} {{ item.tyre.name }}</h6>
-                                <p class="mb-0 text-muted">
+                        <div class="flex-shrink-0" style="width: 100px;">
+                            {% if item.tyre %}
+                                {% if item.tyre.image %}
+                                    <img src="{{ item.tyre.image.url }}" alt="{{ item.tyre.model.name }}" class="img-fluid">
+                                {% endif %}
+                            {% elif item.rim %}
+                                {% if item.rim.image %}
+                                    <img src="{{ item.rim.image.url }}" alt="{{ item.rim.model.name }}" class="img-fluid">
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            {% if item.tyre %}
+                                <h6 class="mb-0">{{ item.tyre.model.brand }} {{ item.tyre.model.name }}</h6>
+                                <p class="mb-0 text-secondary">
                                     {{ item.tyre.width }}/{{ item.tyre.profile }} R{{ item.tyre.radius }}
                                     ({{ item.tyre.get_season_display }})
                                 </p>
                                 <p class="mb-0">
                                     {{ item.quantity }} × {{ item.price }} ₽ = {{ item.get_cost }} ₽
                                 </p>
-                            </div>
-                        {% else %}
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0">{{ item.tyre.brand }} {{ item.tyre.name }}</h6>
-                                <p class="mb-0 text-muted">
-                                    {{ item.tyre.width }}/{{ item.tyre.profile }} R{{ item.tyre.radius }}
-                                    ({{ item.tyre.get_season_display }})
+                            {% elif item.rim %}
+                                <h6 class="mb-0">{{ item.rim.model.brand }} {{ item.rim.model.name }}</h6>
+                                <p class="mb-0 text-secondary">
+                                    {{ item.rim.diameter|floatformat:1 }}x{{ item.rim.width|floatformat:1 }} {{ item.rim.bolt_pattern }}
                                 </p>
                                 <p class="mb-0">
                                     {{ item.quantity }} × {{ item.price }} ₽ = {{ item.get_cost }} ₽
                                 </p>
-                            </div>
-                        {% endif %}
+                            {% else %}
+                                <h6 class="mb-0 text-danger">Неизвестный товар</h6>
+                                <p class="mb-0">Количество: {{ item.quantity }} | Цена: {{ item.price }} ₽</p>
+                            {% endif %}
+                        </div>
                     </div>
                     {% if not forloop.last %}<hr>{% endif %}
                 {% endfor %}
@@ -93,19 +101,17 @@
         </div>
     </div>
     
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Действия</h5>
-            </div>
-            <div class="card-body">
-                <a href="{% url 'orders:list' %}" class="btn btn-outline-primary w-100 mb-2">
-                    Вернуться к списку заказов
-                </a>
-                <a href="{% url 'tyres:catalogue' %}" class="btn btn-primary w-100">
-                    Перейти в каталог
-                </a>
-            </div>
+    <div class="col-md-4 mb-4">
+        <div class="d-grid gap-2">
+            <a href="{% url 'orders:order_receipt' order.id %}" class="btn btn-success" target="_blank">
+                <i class="fas fa-receipt"></i> Открыть чек
+            </a>
+            <a href="{% url 'orders:order_list' %}" class="btn btn-outline-primary">
+                Вернуться к списку заказов
+            </a>
+            <a href="{% url 'tyres:catalogue' %}" class="btn btn-primary">
+                Перейти в каталог
+            </a>
         </div>
     </div>
 </div>

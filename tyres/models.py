@@ -2,14 +2,22 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.files.storage import default_storage
 
 User = get_user_model()
+
+def get_default_tyre_image():
+    return 'tyres/default_tyre.jpg'
+
+def get_default_rim_image():
+    return 'rims/default_rim.jpg'
 
 class TyreModel(models.Model):
     name = models.CharField('Название', max_length=200, db_index=True)
     brand = models.CharField('Бренд', max_length=100, db_index=True)
     description = models.TextField('Описание')
-    image = models.ImageField('Изображение', upload_to='tyres/', blank=True)
+    image = models.ImageField('Изображение', upload_to='tyres/', default=get_default_tyre_image)
+    release_year = models.IntegerField('Год выпуска', null=True, blank=True)
 
     class Meta:
         indexes = [
@@ -19,6 +27,11 @@ class TyreModel(models.Model):
 
     def __str__(self):
         return f"{self.brand} {self.name}"
+
+    def get_image_url(self):
+        if self.image and default_storage.exists(self.image.name):
+            return self.image.url
+        return settings.STATIC_URL + 'images/default_tyre.jpg'
 
 class TyreVariant(models.Model):
     SEASON_CHOICES = [
@@ -73,8 +86,12 @@ class Favourite(models.Model):
         unique_together = ('user', 'variant')
         indexes = [
             models.Index(fields=['user', 'added_at']),
+            models.Index(fields=['variant']),
         ]
         ordering = ['-added_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.variant}"
 
 class Category(models.Model):
     CATEGORY_TYPES = [
@@ -108,7 +125,8 @@ class RimModel(models.Model):
     name = models.CharField('Название', max_length=200, db_index=True)
     brand = models.CharField('Бренд', max_length=100, db_index=True)
     description = models.TextField('Описание', blank=True)
-    image = models.ImageField('Изображение', upload_to='rims/', blank=True)
+    image = models.ImageField('Изображение', upload_to='rims/', default=get_default_rim_image)
+    release_year = models.IntegerField('Год выпуска', null=True, blank=True)
 
     class Meta:
         indexes = [
@@ -121,15 +139,36 @@ class RimModel(models.Model):
     def __str__(self):
         return f"{self.brand} {self.name}"
 
+    def get_image_url(self):
+        if self.image and default_storage.exists(self.image.name):
+            return self.image.url
+        return settings.STATIC_URL + 'images/default_rim.jpg'
+
 class RimVariant(models.Model):
+    RIM_COLOR_CHOICES = [
+        ('silver', 'Серебристый'),
+        ('black', 'Черный'),
+        ('grey', 'Серый'),
+        ('white', 'Белый'),
+        ('bronze', 'Бронзовый'),
+        ('custom', 'Другой'),
+    ]
+
+    RIM_MATERIAL_CHOICES = [
+        ('forged', 'Кованый'),
+        ('cast', 'Литой'),
+        ('stamped', 'Штампованный'),
+        ('other', 'Другой'),
+    ]
+
     model = models.ForeignKey(RimModel, related_name='variants', on_delete=models.CASCADE)
     diameter = models.FloatField('Диаметр')
     width = models.FloatField('Ширина')
     bolt_pattern = models.CharField('Тип крепления', max_length=50)
     offset = models.CharField('Вылет (ET)', max_length=20, blank=True)
     dia = models.CharField('DIA', max_length=20, blank=True)
-    color = models.CharField('Цвет', max_length=50, blank=True)
-    material = models.CharField('Материал', max_length=50)
+    color = models.CharField('Цвет', max_length=50, blank=True, choices=RIM_COLOR_CHOICES)
+    material = models.CharField('Материал', max_length=50, choices=RIM_MATERIAL_CHOICES)
     price = models.DecimalField('Цена', max_digits=10, decimal_places=2)
     stock = models.IntegerField('Количество на складе', default=0)
     image = models.ImageField('Изображение', upload_to='rims/variants/', null=True, blank=True)
@@ -153,3 +192,11 @@ class FavouriteRim(models.Model):
 
     class Meta:
         unique_together = ('user', 'rim_variant')
+        indexes = [
+            models.Index(fields=['user', 'created']),
+            models.Index(fields=['rim_variant']),
+        ]
+        ordering = ['-created']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.rim_variant}"

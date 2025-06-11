@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Чек заказа №{{ order.id }}</title>
+    <style>
+        body {
+            font-family: 'DejaVu Sans', sans-serif; /* Для поддержки кириллицы */
+            font-size: 10px;
+            line-height: 1.4;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #eee;
+            background: #fff;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 18px;
+            color: #555;
+        }
+        .details, .items-table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+        .details td, .items-table th, .items-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+        .items-table th {
+            background-color: #f2f2f2;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .total {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Чек заказа №{{ order.id }}</h1>
+            <p>Дата: {{ order.created|date:"d.m.Y H:i" }}</p>
+        </div>
+
+        <table class="details">
+            <tr>
+                <td style="width: 50%;"><strong>Информация о заказчике:</strong></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Имя: {{ order.first_name }} {{ order.last_name }}</td>
+                <td>Email: {{ order.email }}</td>
+            </tr>
+            <tr>
+                <td>Телефон: {{ order.phone }}</td>
+                <td>Адрес: {{ order.postal_code }}, {{ order.city }}, {{ order.address }}</td>
+            </tr>
+            {% if order.note %}
+            <tr>
+                <td colspan="2">Примечание: {{ order.note }}</td>
+            </tr>
+            {% endif %}
+        </table>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width: 50%;">Товар</th>
+                    <th class="text-right">Количество</th>
+                    <th class="text-right">Цена за шт.</th>
+                    <th class="text-right">Сумма</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items.all %}
+                <tr>
+                    <td>
+                        {% if item.tyre %}
+                            {{ item.tyre.model.brand }} {{ item.tyre.model.name }} <br>
+                            <small>{{ item.tyre.width }}/{{ item.tyre.profile }} R{{ item.tyre.radius }} ({{ item.tyre.get_season_display }})</small>
+                        {% elif item.rim %}
+                            {{ item.rim.model.brand }} {{ item.rim.model.name }} <br>
+                            <small>{{ item.rim.diameter|floatformat:1 }}x{{ item.rim.width|floatformat:1 }} {{ item.rim.bolt_pattern }}</small>
+                        {% else %}
+                            Неизвестный товар
+                        {% endif %}
+                    </td>
+                    <td class="text-right">{{ item.quantity }}</td>
+                    <td class="text-right">{{ item.price }} ₽</td>
+                    <td class="text-right">{{ item.get_cost }} ₽</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-right"><strong>Итого:</strong></td>
+                    <td class="text-right"><strong>{{ order.get_total_cost }} ₽</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="footer">
+            <p>Спасибо за ваш заказ!</p>
+        </div>
+    </div>
+</body>
+</html> 

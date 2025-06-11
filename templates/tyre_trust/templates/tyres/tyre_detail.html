@@ -1,0 +1,82 @@
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-5 d-flex align-items-stretch justify-content-end pe-md-2">
+            <div class="tyre-image-wrapper">
+                {% if tyre.image %}
+                    <img src="{{ tyre.image.url }}" class="img-fluid" alt="{{ tyre.name }}">
+                {% else %}
+                    <img src="https://via.placeholder.com/400x400" class="img-fluid" alt="Placeholder">
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-7">
+            <h2 class="mb-3">{{ tyre.brand }} {{ tyre.name }}</h2>
+            <div class="card mb-4 tech-specs-card">
+                <div class="card-body">
+                    <h5 class="card-title">Технические характеристики</h5>
+                    <ul class="list-unstyled tech-specs-list">
+                        <li><strong>Бренд:</strong> {{ tyre.brand }}</li>
+                        <li><strong>Модель:</strong> {{ tyre.name }}</li>
+                        {% if tyre.description %}
+                            <li><strong>Описание:</strong> {{ tyre.description }}</li>
+                        {% endif %}
+                        {% comment %}
+                            Assuming tyre.variants is available and we can pick the first one for general specs.
+                            If a specific variant is needed, this logic might need adjustment.
+                        {% endcomment %}
+                        {% if tyre.variants.first %}
+                            <li><strong>Ширина:</strong> {{ tyre.variants.first.width }}</li>
+                            <li><strong>Профиль:</strong> {{ tyre.variants.first.profile }}</li>
+                            <li><strong>Радиус:</strong> {{ tyre.variants.first.radius }}</li>
+                            <li><strong>Сезон:</strong> {{ tyre.variants.first.get_season_display }}</li>
+                            <li><strong>Шипованная:</strong> {% if tyre.variants.first.studded %}Да{% else %}Нет{% endif %}</li>
+                            <li><strong>Индекс скорости:</strong> {{ tyre.variants.first.get_speed_index_display }}</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+            <h5 class="mb-1 mt-0">Доступные варианты:</h5>
+            <div class="table-responsive-mobile tyre-variants-scroll" style="margin-bottom:0; max-height:350px; overflow-y:auto;">
+                <div id="tyre-variants-list" class="fade-transition">
+                    {% include "tyres/_tyre_variants_list_partial.html" %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.tyre-image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 100%; /* 1:1 Aspect Ratio */
+    overflow: hidden;
+    background: var(--card-bg) !important;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tyre-image-wrapper img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Ensure entire image is visible */
+    transition: transform 0.3s ease;
+}
+
+.tyre-card:hover .tyre-image-wrapper img {
+    transform: scale(1.05);
+}
+
+.card.tech-specs-card {
+    padding: 0 !important;
+}
+</style> 

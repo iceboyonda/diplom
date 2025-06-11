@@ -1,5 +1,5 @@
 {% if variants %}
-<table class="table table-striped">
+<table class="table table-striped rim-variants-table mb-2">
     <thead>
         <tr>
             <th>Диаметр</th>
@@ -17,39 +17,30 @@
     <tbody>
         {% for variant in variants %}
             <tr>
-                <td>{{ variant.diameter|floatformat:1 }}</td>
-                <td>{{ variant.width|floatformat:1 }}</td>
-                <td>{{ variant.bolt_pattern }}</td>
-                <td>{{ variant.offset }}</td>
-                <td>{{ variant.dia }}</td>
-                <td>{{ variant.color }}</td>
-                <td>{{ variant.material }}</td>
-                <td>{{ variant.price|floatformat:0 }} ₽</td>
-                <td>{% if variant.stock > 0 %}{{ variant.stock }} шт.{% else %}Нет в наличии{% endif %}</td>
-                <td>
-                    <div class="d-flex flex-column gap-2">
+                <td data-label="Диаметр">{{ variant.diameter|floatformat:1 }}</td>
+                <td data-label="Ширина">{{ variant.width|floatformat:1 }}</td>
+                <td data-label="Крепление">{{ variant.bolt_pattern }}</td>
+                <td data-label="Вылет (ET)">{{ variant.offset }}</td>
+                <td data-label="DIA">{{ variant.dia }}</td>
+                <td data-label="Цвет">{{ variant.color }}</td>
+                <td data-label="Материал">{{ variant.material }}</td>
+                <td data-label="Цена">{{ variant.price|floatformat:0 }} ₽</td>
+                <td data-label="В наличии">{% if variant.stock > 0 %}{{ variant.stock }} шт.{% else %}Нет в наличии{% endif %}</td>
+                <td data-label="Действия">
+                    <div class="d-flex align-items-center justify-content-start flex-wrap gap-2">
                         {% if variant.stock > 0 %}
-                        <form action="{% url 'cart:add_rim' variant.id %}" method="post" class="d-flex align-items-center">
+                        <form action="{% url 'cart:add_rim' variant.id %}" method="post" class="d-flex align-items-center gap-2">
                             {% csrf_token %}
-                            <input type="number" name="quantity" value="1" min="1" max="{{ variant.stock }}" class="form-control me-2" style="width: 80px;">
+                            <input type="number" name="quantity" value="1" min="1" max="{{ variant.stock }}" class="form-control form-control-sm" style="width: 80px;">
                             <button type="submit" class="btn btn-primary btn-sm">В корзину</button>
                         </form>
                         {% else %}
                         <span class="text-danger">Нет в наличии</span>
                         {% endif %}
-                        
                         {% if user.is_authenticated %}
-                            {% if variant.id in favourite_rim_ids %}
-                                <form action="{% url 'tyres:remove_favourite_rim' variant.id %}" method="post" class="mt-2">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-sm w-100">Убрать из избранного</button>
-                                </form>
-                            {% else %}
-                                <form action="{% url 'tyres:add_favourite_rim' variant.id %}" method="post" class="mt-2">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">❤ В избранное</button>
-                                </form>
-                            {% endif %}
+                            <div id="favourite-button-rim-{{ variant.id }}" class="d-flex align-items-center">
+                            {% include "tyres/_favourite_rim_button.html" with rim_variant=variant favourite_rim_ids=favourite_rim_ids %}
+                            </div>
                         {% endif %}
                     </div>
                 </td>
@@ -68,6 +59,83 @@
 {% endif %}
 
 <style>
+.rim-variants-table {
+    background: var(--table-bg, #232323);
+    color: var(--text-color, #fff);
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 1rem;
+}
+.rim-variants-table th, .rim-variants-table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-color: var(--table-border, #444);
+    font-size: 1rem;
+}
+.rim-variants-table th {
+    background: #232323;
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+}
+.rim-variants-table td {
+    background: #232323;
+    color: #fff;
+    text-align: center;
+}
+.rim-variants-table td[data-label="Цвет"],
+.rim-variants-table td[data-label="Материал"],
+.rim-variants-table td[data-label="Крепление"] {
+    text-align: left;
+}
+.rim-variants-table td[data-label="Действия"] {
+    min-width: 180px;
+}
+.rim-variants-table tr {
+    height: 56px;
+}
+@media (max-width: 768px) {
+    .rim-variants-table, .rim-variants-table thead, .rim-variants-table tbody, .rim-variants-table th, .rim-variants-table td, .rim-variants-table tr {
+        display: block;
+        width: 100%;
+    }
+    .rim-variants-table thead {
+        display: none;
+    }
+    .rim-variants-table tr {
+        margin-bottom: 1.2rem;
+        border: 1px solid var(--table-border, #ccc);
+        border-radius: 10px;
+        background: var(--table-bg, #fff);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 10px 0;
+        height: auto;
+    }
+    .rim-variants-table td {
+        padding-left: 50%;
+        position: relative;
+        min-height: 40px;
+        border: none;
+        border-bottom: 1px solid var(--table-border, #eee);
+        color: var(--text-color, #222);
+        background: transparent;
+        text-align: left !important;
+    }
+    .rim-variants-table td:last-child {
+        border-bottom: none;
+    }
+    .rim-variants-table td:before {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        width: 45%;
+        white-space: nowrap;
+        font-weight: bold;
+        color: var(--secondary-text, #888);
+        content: attr(data-label);
+    }
+}
+
 body.dark-theme .table, body.dark-theme .table th, body.dark-theme .table td {
     color: #fff !important;
     background-color: #232323 !important;

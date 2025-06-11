@@ -1,0 +1,15 @@
+{% if variant.id in favourite_ids %}
+    <button class="btn btn-danger btn-sm favourite-btn"
+            hx-post="{% url 'tyres:remove_from_favourites' variant.id %}"
+            hx-swap="outerHTML"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+        <i class="fas fa-heart"></i>
+    </button>
+{% else %}
+    <button class="btn btn-outline-danger btn-sm favourite-btn"
+            hx-post="{% url 'tyres:add_to_favourites' variant.id %}"
+            hx-swap="outerHTML"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+        <i class="far fa-heart"></i>
+    </button>
+{% endif %} 

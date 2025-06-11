@@ -1,11 +1,4 @@
-<style>
-body.dark-theme .table, body.dark-theme .table th, body.dark-theme .table td {
-    color: #fff !important;
-    background-color: #232323 !important;
-    border-color: #444 !important;
-}
-</style>
-<table class="table table-bordered">
+<table class="table table-bordered tyre-variants-table">
     <thead>
         <tr>
             <th>Размер</th>
@@ -20,37 +13,126 @@ body.dark-theme .table, body.dark-theme .table th, body.dark-theme .table td {
     <tbody>
         {% for variant in tyre.variants.all %}
         <tr>
-            <td>{{ variant.width }}/{{ variant.profile }} R{{ variant.radius }}</td>
-            <td>{{ variant.get_season_display }}</td>
-            <td>{% if variant.studded %}Да{% else %}Нет{% endif %}</td>
-            <td>{{ variant.speed_index }}</td>
-            <td>{{ variant.price }} ₽</td>
-            <td>{{ variant.stock }}</td>
-            <td>
+            <td data-label="Размер">{{ variant.width }}/{{ variant.profile }} R{{ variant.radius }}</td>
+            <td data-label="Сезон">{{ variant.get_season_display }}</td>
+            <td data-label="Шипы">{% if variant.studded %}Да{% else %}Нет{% endif %}</td>
+            <td data-label="Индекс скорости">{{ variant.speed_index }}</td>
+            <td data-label="Цена">{{ variant.price }} ₽</td>
+            <td data-label="В наличии">{{ variant.stock }}</td>
+            <td data-label="">
+                <div class="d-flex align-items-center justify-content-start flex-wrap gap-2">
                 {% if variant.stock > 0 %}
-                <form action="{% url 'cart:add' variant.id %}" method="post" class="d-flex align-items-center">
+                    <form action="{% url 'cart:add' variant.id %}" method="post" class="d-flex align-items-center gap-2">
                     {% csrf_token %}
-                    <input type="number" name="quantity" value="1" min="1" max="{{ variant.stock }}" class="form-control me-2" style="width: 80px;">
+                        <input type="number" name="quantity" value="1" min="1" max="{{ variant.stock }}" class="form-control form-control-sm" style="width: 80px;">
                     <button type="submit" class="btn btn-primary btn-sm">В корзину</button>
                 </form>
                 {% else %}
                 <span class="text-danger">Нет в наличии</span>
                 {% endif %}
+
                 {% if user.is_authenticated %}
+                        <div id="favourite-button-variant-{{ variant.id }}" class="d-flex align-items-center">
+                            <form hx-post="{% url 'tyres:toggle_favourite_tyre_variant' variant.id %}" hx-target="#favourite-button-variant-{{ variant.id }}" hx-swap="outerHTML" hx-indicator="#favourite-spinner-variant-{{ variant.id }}" class="d-flex align-items-center">
+                        {% csrf_token %}
+                                <button type="submit" class="btn btn-link p-0 text-danger favourite-heart-icon">
                     {% if variant.id in favourite_ids %}
-                        <form action="{% url 'tyres:remove_favourite' variant.id %}" method="post" class="mt-2">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger btn-sm">Убрать из избранного</button>
-                        </form>
+                                        <i class="fas fa-heart"></i> {# Full heart icon #}
                     {% else %}
-                        <form action="{% url 'tyres:add_favourite' variant.id %}" method="post" class="mt-2">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-outline-danger btn-sm">❤ В избранное</button>
+                                        <i class="far fa-heart"></i> {# Empty heart icon #}
+                        {% endif %}
+                                </button>
+                                <span id="favourite-spinner-variant-{{ variant.id }}" class="spinner-border spinner-border-sm htmx-indicator" role="status" aria-hidden="true"></span>
                         </form>
-                    {% endif %}
+                        </div>
                 {% endif %}
+                </div>
             </td>
         </tr>
         {% endfor %}
     </tbody>
-</table> 
+</table>
+
+<style>
+.tyre-variants-table {
+    background: var(--table-bg, #232323);
+    color: var(--text-color, #fff);
+    border-radius: 12px;
+    overflow: hidden;
+    font-size: 1rem;
+}
+.tyre-variants-table th, .tyre-variants-table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    border-color: var(--table-border, #444);
+    font-size: 1rem;
+}
+.tyre-variants-table th {
+    background: #232323;
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+}
+.tyre-variants-table td {
+    background: #232323;
+    color: #fff;
+    text-align: center;
+}
+.tyre-variants-table td[data-label="Размер"],
+.tyre-variants-table td[data-label="Сезон"],
+.tyre-variants-table td[data-label="Шипы"] {
+    text-align: left;
+}
+.tyre-variants-table td[data-label=""] {
+    min-width: 180px;
+}
+.tyre-variants-table tr {
+    height: 56px;
+}
+@media (max-width: 768px) {
+    .tyre-variants-table, .tyre-variants-table thead, .tyre-variants-table tbody, .tyre-variants-table th, .tyre-variants-table td, .tyre-variants-table tr {
+        display: block;
+        width: 100%;
+    }
+    .tyre-variants-table thead {
+        display: none;
+    }
+    .tyre-variants-table tr {
+        margin-bottom: 1.2rem;
+        border: 1px solid var(--table-border, #ccc);
+        border-radius: 10px;
+        background: var(--table-bg, #fff);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 10px 0;
+        height: auto;
+    }
+    .tyre-variants-table td {
+        padding-left: 50%;
+        position: relative;
+        min-height: 40px;
+        border: none;
+        border-bottom: 1px solid var(--table-border, #eee);
+        color: var(--text-color, #222);
+        background: transparent;
+        text-align: left !important;
+    }
+    .tyre-variants-table td:last-child {
+        border-bottom: none;
+    }
+    .tyre-variants-table td:before {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        width: 45%;
+        white-space: nowrap;
+        font-weight: bold;
+        color: var(--secondary-text, #888);
+        content: attr(data-label);
+    }
+}
+body.dark-theme .tyre-variants-table, body.dark-theme .tyre-variants-table th, body.dark-theme .tyre-variants-table td {
+    color: #fff !important;
+    background-color: #232323 !important;
+    border-color: #444 !important;
+}
+</style> 

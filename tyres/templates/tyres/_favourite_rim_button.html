@@ -1,0 +1,23 @@
+{% comment %}
+    Этот шаблон предназначен для кнопки "Избранное" для вариантов дисков.
+    Он ожидает контекст: 'rim_variant' (объект RimVariant) и 'favourite_rim_ids' (список ID избранных вариантов дисков).
+{% endcomment %}
+<form hx-post="{% url 'tyres:add_rim_to_favourites' rim_variant.id %}" 
+      hx-target="#favourite-icon-rim-{{ rim_variant.id }}" 
+      hx-swap="outerHTML" 
+      hx-indicator="#favourite-spinner-rim-{{ rim_variant.id }}"
+      hx-on::after-request="if(event.detail.failed) { alert('Ошибка при добавлении в избранное'); }"
+      class="d-flex align-items-center">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-link p-0 text-danger favourite-heart-icon"
+            title="{% if rim_variant.id in favourite_rim_ids %}Удалить из избранного{% else %}Добавить в избранное{% endif %}">
+        <span id="favourite-icon-rim-{{ rim_variant.id }}">
+    {% if rim_variant.id in favourite_rim_ids %}
+                <i class="fas fa-heart"></i> {# Full heart icon #}
+    {% else %}
+                <i class="far fa-heart"></i> {# Empty heart icon #}
+    {% endif %}
+        </span>
+    </button> 
+    <span id="favourite-spinner-rim-{{ rim_variant.id }}" class="spinner-border spinner-border-sm htmx-indicator ms-2" role="status" aria-hidden="true"></span>
+</form> 

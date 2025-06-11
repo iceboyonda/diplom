@@ -1,19 +1,5 @@
-<div class="row row-cols-1 row-cols-md-3 g-4">
-{% comment %} DEBUG: Проверка, рендерится ли _rims_list.html до цикла по дискам {% endcomment %}
-{# <p>DEBUG: Rendering _rims_list.html. About to loop through rims.</p> #}
-
-{% comment %} DEBUG: Проверка типа page_obj.object_list {% endcomment %}
-{# <p>DEBUG: Type of page_obj.object_list: {{ page_obj.object_list|class_name }}</p> #} {# Удаляем строку с недействительным фильтром #}
-
-{% comment %} DEBUG: Проверка первого элемента в page_obj.object_list {% endcomment %}
-{# <p>DEBUG: First item in page_obj.object_list ID: {{ page_obj.object_list.0.id }}</p> #}
-{# <p>DEBUG: First item Brand: {{ page_obj.object_list.0.brand }}</p> #}
-{# <p>DEBUG: First item Variants Count: {{ page_obj.object_list.0.variants.count }}</p> #}
-
-{% comment %} DEBUG: Дополнительные проверки перед циклом {% endcomment %}
-{# <p>DEBUG: Count of page_obj.object_list: {{ page_obj.object_list|length }}</p> #}
-{# <p>DEBUG: page_obj.object_list type: {{ page_obj.object_list }}</p> #}
-
+{% load static %}
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
 {% if no_rims_in_db %}
   <div class="col-12">
     <div class="alert alert-warning shadow-sm">
@@ -33,91 +19,66 @@
     </div>
   </div>
 {% else %}
-{% comment %} Возвращаем цикл к стандартному виду {% endcomment %}
 {% for rim in page_obj.object_list %}
   <div class="col">
-    {# Возвращаем HTML карточки диска #}
-    <div class="card tyre-card h-100 shadow-sm rounded">
-      <div class="card-inner">
-        {% if rim.image %}
-            <div class="card-img-wrapper">
-                <img src="{{ rim.image.url }}" class="card-img-top" alt="{{ rim.brand }} {{ rim.name }} фото">
-            </div>
+    <a href="{% url 'tyres:rim_detail' rim.id %}" class="rim-card text-decoration-none">
+      <div class="card-img-wrapper">
+      {% if rim.image %}
+          <img src="{{ rim.image.url }}" alt="{{ rim.brand }} {{ rim.name }}" class="img-fluid">
         {% else %}
-            {% with variant=rim.variants.all|first %}
-                {% if variant and variant.image %}
-                    <div class="card-img-wrapper">
-                        <img src="{{ variant.image.url }}" class="card-img-top" alt="{{ rim.brand }} {{ rim.name }} фото">
-                    </div>
-                {% else %}
-                    <div class="card-img-wrapper">
-                        <img src="/static/img/default-rim.png" class="card-img-top" alt="Фото диска не найдено">
-                    </div>
-                {% endif %}
-            {% endwith %}
+          {% with first_variant_with_image=rim.variants.all|first %}
+            {% if first_variant_with_image and first_variant_with_image.image %}
+              <img src="{{ first_variant_with_image.image.url }}" alt="{{ rim.brand }} {{ rim.name }} (вариант)" class="img-fluid">
+          {% else %}
+              <img src="{% static 'images/no-image.png' %}" alt="No image" class="img-fluid">
+          {% endif %}
+        {% endwith %}
         {% endif %}
-
-        <div class="card-body d-flex flex-column tyre-details">
-            <h5 class="card-title">{{ rim.brand }} {{ rim.name }}</h5>
-            <p class="card-text">
-                {% if rim.diameter_display %}
-                    <small class="card-spec">Размеры: {{ rim.diameter_display }}</small><br>
-                {% endif %}
-                {% if rim.width_display %}
-                    <small class="card-spec">Ширина: {{ rim.width_display }}</small><br>
-                {% endif %}
-                {% if rim.bolt_patterns_display %}
-                    <small class="card-spec">Крепление: {{ rim.bolt_patterns_display }}</small><br>
-                {% endif %}
-                Цена: <strong class="price-tag">от {{ rim.min_price|floatformat:0 }} ₽</strong>
-            </p>
-
-            {# Кнопка "Подробнее" #}
-            <a href="{% url 'tyres:rim_detail' rim.id %}" class="btn btn-outline-secondary btn-sm mt-2 w-100">
-                <i class="fas fa-info-circle"></i> Подробнее
-            </a>
+      </div>
+      <div class="rim-details">
+        <h3 class="card-title text-center">{{ rim.brand }} {{ rim.name }}</h3>
+        <div class="card-spec text-center">
+            <p class="mb-0">Диаметр: {{ rim.diameter_display }}</p>
+            <p class="mb-0">Крепление: {{ rim.bolt_patterns_display }}</p>
+        </div>
+        <div class="price-tag text-center">
+          от {{ rim.min_price|floatformat:0 }} ₽
         </div>
       </div>
+    </a>
+  </div>
+{% empty %}
+  <div class="col-12">
+    <div class="alert alert-info">
+      По вашему запросу ничего не найдено. Попробуйте изменить параметры поиска.
     </div>
-    {# Конец HTML карточки диска #}
-
-    {# Отладочные сообщения (если нужно для пошаговой отладки после annotate) #}
-    {# <p>DEBUG: Inside loop for rim. Rim ID: {{ rim.id }}</p> #}
-    {# <p>DEBUG: Brand: {{ rim.brand }}</p> #}
-    {# <p>DEBUG: Name: {{ rim.name }}</p> #}
-    {# <p>DEBUG: Diameter Display: {{ rim.diameter_display }}</p> #}
-    {# <p>DEBUG: Width Display: {{ rim.width_display }}</p> #}
-    {# <p>DEBUG: Bolt Pattern Display: {{ rim.bolt_patterns_display }}</p> #}
-    {# <p>DEBUG: Min Price: {{ rim.min_price }}</p> #}
-    {# {% for variant in rim.variants.all %} #}
-    {#   <p>DEBUG Variant: ID: {{ variant.id }}, Diameter: {{ variant.diameter }}, Price: {{ variant.price }}</p> #}
-    {# {% endfor %} #}
   </div>
 {% endfor %}
 {% endif %}
 </div>
 
 <style>
-.tyre-card {
-    position: relative;
-    border-radius: 1.5rem;
-    background: var(--card-bg) !important;
-    color: var(--text-color) !important;
-    box-shadow: 0 2px 16px rgba(57, 115, 247, 0.08);
-    z-index: 1;
+    .rim-card {
+        background: var(--card-bg);
+        border-radius: 16px;
     overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
 }
-.tyre-card::before {
-    display: none !important;
+    .rim-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
-
 .card-img-wrapper {
     position: relative;
-    padding-top: 75%;
+        padding-top: 75%; /* Aspect ratio 4:3 */
     overflow: hidden;
-    background: var(--card-bg) !important;
+        background: var(--card-bg);
+        border-radius: 16px 16px 0 0;
 }
-
 .card-img-wrapper img {
     position: absolute;
     top: 0;
@@ -127,46 +88,54 @@
     object-fit: cover;
     transition: transform 0.3s ease;
 }
-
-.tyre-card:hover .card-img-wrapper img {
+    .rim-card:hover .card-img-wrapper img {
     transform: scale(1.05);
 }
-
-.tyre-details {
-    padding: 1rem;
-}
-
+    .rim-details {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--text-color);
+        line-height: 1.4;
+    }
+    .card-spec {
+        font-size: 0.9rem;
+        color: var(--secondary-text);
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
 .price-tag {
-    font-size: 1.25rem;
-    color: var(--bs-primary);
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
 }
-
-.badge {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
+    /* Dark theme improvements */
+    body.dark-theme .rim-card {
+        background: var(--card-bg);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
-
-.btn-primary {
-    transition: all 0.3s ease;
+    body.dark-theme .rim-card:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
-}
-
-.btn-danger, .btn-outline-danger {
-    transition: all 0.3s ease;
-}
-
-.btn-danger:hover, .btn-outline-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
-}
-
-body.dark-theme .card-spec {
-    color: #bfc9db !important;
+    /* Responsive improvements */
+    @media (max-width: 768px) {
+        .rim-card {
+            margin-bottom: 1.5rem;
+        }
+        .card-title {
+            font-size: 1.1rem;
+        }
+        .price-tag {
+            font-size: 1.3rem;
+        }
 }
 </style>
 
-{% include "tyres/_pagination.html" with page_obj=page_obj query_string=query_string hx_target="#rims-list" %} 
+{% include "tyres/_rims_pagination.html" with page_obj=page_obj query_string=query_string %}

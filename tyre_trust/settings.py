@@ -83,14 +83,23 @@ WSGI_APPLICATION = 'tyre_trust.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# MySQL database configuration
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'tyre_trust',
+#         'USER': 'root',
+#         'PASSWORD': 'iceboy',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
+
+# SQLite database configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tyre_trust',
-        'USER': 'root',
-        'PASSWORD': 'iceboy',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -155,3 +164,10 @@ CART_SESSION_ID = 'cart'
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'tyres:catalogue'
 LOGOUT_REDIRECT_URL = 'tyres:catalogue'
+
+# Отключение кэширования для разработки
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+    }
+}

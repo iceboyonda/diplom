@@ -70,8 +70,16 @@ class Cart:
         for product_id, item in self.cart.items():
             if item['type'] == 'tyre':
                 item['product'] = tyres.get(int(product_id))
+                if item['product']:
+                    print(f"[DEBUG CART] Tyre product loaded: {item['product'].model.brand} {item['product'].model.name}")
+                else:
+                    print(f"[DEBUG CART] Tyre product not found for ID: {product_id}")
             elif item['type'] == 'rim':
                 item['product'] = rims.get(int(product_id))
+                if item['product']:
+                    print(f"[DEBUG CART] Rim product loaded: {item['product'].model.brand} {item['product'].model.name}")
+                else:
+                    print(f"[DEBUG CART] Rim product not found for ID: {product_id}")
             item['total_price'] = float(item['price']) * item['quantity']
             yield item
 
@@ -98,4 +106,32 @@ class Cart:
         """
         Получить общее количество товаров в корзине
         """
-        return sum(item['quantity'] for item in self.cart.values()) 
+        return sum(item['quantity'] for item in self.cart.values())
+
+    def get_unique_items_count(self):
+        """
+        Получить количество уникальных товаров в корзине
+        """
+        return len(self.cart)
+
+    def is_product_in_cart(self, product_id, product_type):
+        """
+        Проверить, есть ли товар в корзине
+        """
+        return str(product_id) in self.cart and self.cart[str(product_id)]['type'] == product_type
+
+    def get_product_quantity(self, product_id):
+        """
+        Получить количество товара в корзине
+        """
+        return self.cart.get(str(product_id), {}).get('quantity', 0)
+
+    def get_cart_summary(self):
+        """
+        Получить краткую информацию о корзине
+        """
+        return {
+            'total_items': self.get_total_quantity(),
+            'unique_items': self.get_unique_items_count(),
+            'total_price': self.get_total_price()
+        } 

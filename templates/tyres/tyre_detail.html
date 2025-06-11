@@ -1,119 +1,319 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ tyre.brand }} {{ tyre.name }} - Tyre Trust{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-md-5">
-            {% if tyre.image %}
-                <img src="{{ tyre.image.url }}" class="img-fluid mb-3" alt="{{ tyre.name }}">
-            {% else %}
-                <img src="https://via.placeholder.com/400x400" class="img-fluid mb-3" alt="Placeholder">
-            {% endif %}
-        </div>
-        <div class="col-md-7">
-            <h2>{{ tyre.brand }} {{ tyre.name }}</h2>
-            <p>{{ tyre.description }}</p>
-            <hr>
-            <h5>Доступные варианты:</h5>
-            <div id="tyre-variants-list" class="fade-transition">
-                {% include "tyres/_tyre_variants_list_partial.html" %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Технические характеристики -->
-<div class="row justify-content-center mt-4 mb-4">
-    <div class="col-lg-10 mx-auto">
-        <div class="card shadow">
-            <div class="card-header py-2">
-                <h5 class="mb-0">Технические характеристики</h5>
-            </div>
-            <div class="card-body p-4">
-                <div class="row">
-                    <div class="col-md-6">
-                        <table class="table table-lg mb-0 fs-5">
-                            <tbody>
-                                <tr>
-                                    <th scope="row">Бренд</th>
-                                    <td>{{ tyre.brand }}</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Модель</th>
-                                    <td>{{ tyre.name }}</td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Ширина</th>
-                                    <td>
-                                        {% if widths|length == 1 %}
-                                            {{ widths.0 }}
-                                        {% elif widths %}
-                                            {{ widths.0 }}–{{ widths|last }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Профиль</th>
-                                    <td>
-                                        {% if profiles|length == 1 %}
-                                            {{ profiles.0 }}
-                                        {% elif profiles %}
-                                            {{ profiles.0 }}–{{ profiles|last }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+<div class="container mt-4 mb-5">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb custom-breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'tyres:catalogue' %}">Шины</a></li>
+            <li class="breadcrumb-item active">{{ tyre.brand }} {{ tyre.name }}</li>
+        </ol>
+    </nav>
+    
+    <div class="card tyre-detail-card mb-4">
+        <div class="card-body p-0">
+            <div class="row g-0">
+                <!-- Фото слева -->
+                <div class="col-md-4">
+                    <div class="product-image-container">
+                        {% if tyre.image %}
+                            <img src="{{ tyre.image.url }}" class="product-image" alt="{{ tyre.brand }} {{ tyre.name }}">
+                        {% else %}
+                            {% with first_variant_with_image=tyre.variants.all|first %}
+                                {% if first_variant_with_image and first_variant_with_image.image %}
+                                    <img src="{{ first_variant_with_image.image.url }}" alt="{{ tyre.brand }} {{ tyre.name }} (вариант)" class="product-image">
+                                {% else %}
+                                    <img src="{% static 'images/no-image.png' %}" alt="No image" class="product-image">
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
                     </div>
-                    <div class="col-md-6">
-                        <table class="table table-lg mb-0 fs-5">
-                            <tbody>
-                                <tr>
-                                    <th scope="row">Радиус</th>
-                                    <td>
-                                        {% if radiuses|length == 1 %}
-                                            R{{ radiuses.0 }}
-                                        {% elif radiuses %}
-                                            R{{ radiuses.0 }}–R{{ radiuses|last }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Сезон</th>
-                                    <td>
-                                        {% if seasons|length == 1 %}
-                                            {{ seasons.0 }}
-                                        {% elif seasons %}
-                                            {{ seasons|join:', ' }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Шипы</th>
-                                    <td>
-                                        {% if studded %}Да{% else %}Нет{% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">Дата обновления</th>
-                                    <td>—</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                </div>
+                
+                <!-- Информация справа -->
+                <div class="col-md-8">
+                    <div class="product-info-container p-4">
+                        <h1 class="product-title mb-2">{{ tyre.brand }} {{ tyre.name }}</h1>
+                        {% if tyre.description %}
+                            <p class="product-desc mb-4">{{ tyre.description }}</p>
+                        {% endif %}
+                        
+                        <div class="specs-container">
+                            <h4 class="specs-title mb-3">Технические характеристики</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="spec-item">
+                                    <div class="spec-name">Бренд</div>
+                                    <div class="spec-value">{{ tyre.brand }}</div>
+                                </div>
+                                <div class="spec-item">
+                                    <div class="spec-name">Модель</div>
+                                    <div class="spec-value">{{ tyre.name }}</div>
+                                </div>
+                                <div class="spec-item">
+                                    <div class="spec-name">Ширина</div>
+                                    <div class="spec-value">{% if widths %}{{ widths|join:', ' }}{% else %}—{% endif %}</div>
+                                </div>
+                                <div class="spec-item">
+                                    <div class="spec-name">Профиль</div>
+                                    <div class="spec-value">{% if profiles %}{{ profiles|join:', ' }}{% else %}—{% endif %}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="spec-item">
+                                    <div class="spec-name">Радиус</div>
+                                    <div class="spec-value">{% if radiuses %}R{{ radiuses|join:', R' }}{% else %}—{% endif %}</div>
+                                </div>
+                                <div class="spec-item">
+                                    <div class="spec-name">Сезон</div>
+                                    <div class="spec-value">{% if seasons %}{{ seasons|join:', ' }}{% else %}—{% endif %}</div>
+                                </div>
+                                <div class="spec-item">
+                                    <div class="spec-name">Шипы</div>
+                                    <div class="spec-value">{% if studded %}Да{% else %}Нет{% endif %}</div>
+                                </div>
+                                <div class="spec-item">
+                                    <div class="spec-name">Год выпуска</div>
+                                    <div class="spec-value">{% if tyre.release_year %}{{ tyre.release_year }}{% else %}—{% endif %}</div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Доступные варианты -->
+    <div class="card variants-card mb-4">
+        <div class="card-body p-0">
+            <div class="variants-title">Доступные варианты:</div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead class="table-header">
+                        <tr>
+                            <th>Размер</th>
+                            <th>Сезон</th>
+                            <th>Шипы</th>
+                            <th>Индекс скорости</th>
+                            <th>Цена</th>
+                            <th>В наличии</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for variant in variants %}
+                            <tr>
+                                <td>{{ variant.width|floatformat:0 }}/{{ variant.profile|floatformat:0 }} R{{ variant.radius|floatformat:0 }}</td>
+                                <td>{{ variant.get_season_display }}</td>
+                                <td>{% if variant.studded %}Да{% else %}Нет{% endif %}</td>
+                                <td>{{ variant.speed_index }}</td>
+                                <td class="fw-bold">{{ variant.price|floatformat:0 }} ₽</td>
+                                <td>{% if variant.stock > 0 %}{{ variant.stock }}{% else %}0{% endif %}</td>
+                                <td>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <div class="quantity-input">
+                                            <input type="number" class="form-control" value="1" min="1" max="{{ variant.stock }}" {% if not variant.stock > 0 %}disabled{% endif %}>
+                                        </div>
+                                        {% if variant.stock > 0 %}
+                                            <form action="{% url 'cart:add' variant.id %}" method="post">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="quantity" value="1">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <button class="btn btn-primary" disabled>
+                                                <i class="fas fa-shopping-cart"></i>
+                                            </button>
+                                        {% endif %}
+                                        
+                                        {% if user.is_authenticated %}
+                                            {% include 'tyres/_favourite_button.html' with variant=variant favourite_ids=favourite_ids %}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
+
+<style>
+/* Улучшенные стили для хлебных крошек */
+.custom-breadcrumb {
+    padding: 0.75rem 1rem;
+    background-color: var(--card-bg);
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-theme .custom-breadcrumb {
+    background-color: #23262F;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.breadcrumb-item a {
+    color: #5494f1;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+body.dark-theme .breadcrumb-item.active {
+    color: #e9ecef;
+}
+
+/* Общие стили для продуктовой страницы */
+.tyre-detail-card, .variants-card {
+    border: none;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: var(--card-bg);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-theme .tyre-detail-card, 
+body.dark-theme .variants-card {
+    background-color: #23262F;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Стили для блока с изображением */
+.product-image-container {
+    height: 420px;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+body.dark-theme .product-image-container {
+    background: #2D303A;
+}
+
+.product-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Стили для блока с информацией */
+.product-info-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0 !important;
+}
+
+.specs-container {
+    margin-top: auto;
+    margin-bottom: 0;
+}
+
+.product-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.product-desc {
+    color: var(--secondary-text, #6c757d);
+}
+
+.specs-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.spec-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    border-bottom: 1px solid var(--table-border, #dee2e6);
+    padding-bottom: 0.5rem;
+}
+
+.spec-name {
+    color: #5494f1;
+    font-weight: 500;
+}
+
+.spec-value {
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+/* Стили для таблицы вариантов */
+.variants-card {
+    height: auto;
+    min-height: 100px;
+}
+
+.variants-title {
+    background-color: var(--table-bg);
+    border-bottom: 1px solid var(--table-border);
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 6px 16px;
+}
+
+.table-header {
+    background-color: var(--table-bg);
+}
+
+.table thead th {
+    border-bottom: 2px solid var(--table-border);
+    color: #5494f1;
+    font-weight: 500;
+    text-align: center;
+}
+
+.table td {
+    vertical-align: middle;
+    text-align: center;
+    border-color: var(--table-border);
+}
+
+.quantity-input {
+    width: 70px;
+}
+
+.btn-primary {
+    white-space: nowrap;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .product-image-container {
+        height: 300px;
+    }
+    
+    .product-info-container {
+        padding: 15px !important;
+    }
+    
+    .product-title {
+        font-size: 1.5rem;
+    }
+}
+</style>
 {% endblock %} 

@@ -10,11 +10,12 @@
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th>№ заказа</th>
+                    <th>Номер заказа</th>
                     <th>Дата</th>
                     <th>Статус</th>
+                    <th>Состав заказа</th>
                     <th>Сумма</th>
-                    <th></th>
+                    <th>Действия</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,9 +32,25 @@
                                 {{ order.get_status_display }}
                             </span>
                         </td>
+                        <td>
+                            <ul class="list-unstyled mb-0">
+                                {% for item in order.items.all %}
+                                    <li>
+                                        {% if item.tyre %}
+                                            {{ item.quantity }}x {{ item.tyre.model.brand.name }} {{ item.tyre.model.name }}
+                                        {% else %}
+                                            {{ item.quantity }}x {{ item.rim.model.brand.name }} {{ item.rim.model.name }}
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <a href="{% url 'orders:order_receipt' order.id %}" class="btn btn-sm btn-outline-secondary mt-2" target="_blank">
+                                <i class="fas fa-receipt"></i> Посмотреть чек
+                            </a>
+                        </td>
                         <td>{{ order.get_total_cost }} ₽</td>
                         <td>
-                            <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-primary btn-sm">
+                            <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-info btn-sm">
                                 Подробнее
                             </a>
                         </td>

@@ -1,0 +1,425 @@
+{% extends 'base.html' %}
+{% block title %}Добавление новой шины{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <!-- Боковая навигация -->
+    <div class="admin-sidebar">
+        <div class="admin-sidebar-header">
+            <h3>TyreTrust</h3>
+            <span>Админ-панель</span>
+        </div>
+        <nav class="admin-nav">
+            <a href="{% url 'accounts:admin_panel' %}" class="admin-nav-link">
+                <i class="fas fa-home"></i>
+                <span>Обзор</span>
+            </a>
+            <a href="{% url 'tyres:admin_tyres' %}" class="admin-nav-link active">
+                <i class="fas fa-circle-notch"></i>
+                <span>Шины</span>
+            </a>
+            <a href="{% url 'tyres:admin_rims' %}" class="admin-nav-link">
+                <i class="fas fa-compact-disc"></i>
+                <span>Диски</span>
+            </a>
+            <a href="{% url 'accounts:admin_users' %}" class="admin-nav-link">
+                <i class="fas fa-users"></i>
+                <span>Пользователи</span>
+            </a>
+            <a href="{% url 'orders:admin_orders' %}" class="admin-nav-link">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Заказы</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="admin-content">
+        <div class="admin-header">
+            <div class="d-flex align-items-center">
+                <a href="{% url 'tyres:admin_tyres' %}" class="btn btn-icon btn-outline-secondary me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="admin-title">Добавление новой шины</h1>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="admin-section">
+                    <form method="POST" enctype="multipart/form-data" class="product-form">
+                        {% csrf_token %}
+                        
+                        <div class="row g-4">
+                            <!-- Основная информация -->
+                            <div class="col-md-6">
+                                <div class="form-section">
+                                    <h2 class="section-title">
+                                        <i class="fas fa-info-circle me-2"></i> Основная информация
+                                    </h2>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.brand.id_for_label }}" class="form-label">Бренд*</label>
+                                        <input type="text" name="{{ form.brand.name }}" id="{{ form.brand.id_for_label }}" class="form-control {% if form.brand.errors %}is-invalid{% endif %}" value="{{ form.brand.value|default:'' }}">
+                                        {% if form.brand.errors %}
+                                            <div class="invalid-feedback">{{ form.brand.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.model.id_for_label }}" class="form-label">Модель*</label>
+                                        <input type="text" name="{{ form.model.name }}" id="{{ form.model.id_for_label }}" class="form-control {% if form.model.errors %}is-invalid{% endif %}" value="{{ form.model.value|default:'' }}">
+                                        {% if form.model.errors %}
+                                            <div class="invalid-feedback">{{ form.model.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                                        <textarea name="{{ form.description.name }}" id="{{ form.description.id_for_label }}" class="form-control" rows="4">{{ form.description.value|default:'' }}</textarea>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.image.id_for_label }}" class="form-label">Изображение</label>
+                                        <input type="file" name="{{ form.image.name }}" id="{{ form.image.id_for_label }}" class="form-control {% if form.image.errors %}is-invalid{% endif %}">
+                                        {% if form.image.errors %}
+                                            <div class="invalid-feedback">{{ form.image.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Технические характеристики -->
+                            <div class="col-md-6">
+                                <div class="form-section">
+                                    <h2 class="section-title">
+                                        <i class="fas fa-cog me-2"></i> Технические характеристики
+                                    </h2>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-md-4">
+                                            <label for="{{ form.width.id_for_label }}" class="form-label">Ширина*</label>
+                                            <input type="number" name="{{ form.width.name }}" id="{{ form.width.id_for_label }}" class="form-control {% if form.width.errors %}is-invalid{% endif %}" value="{{ form.width.value|default:'' }}">
+                                            {% if form.width.errors %}
+                                                <div class="invalid-feedback">{{ form.width.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="{{ form.profile.id_for_label }}" class="form-label">Профиль*</label>
+                                            <input type="number" name="{{ form.profile.name }}" id="{{ form.profile.id_for_label }}" class="form-control {% if form.profile.errors %}is-invalid{% endif %}" value="{{ form.profile.value|default:'' }}">
+                                            {% if form.profile.errors %}
+                                                <div class="invalid-feedback">{{ form.profile.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label for="{{ form.diameter.id_for_label }}" class="form-label">Диаметр*</label>
+                                            <input type="number" name="{{ form.diameter.name }}" id="{{ form.diameter.id_for_label }}" class="form-control {% if form.diameter.errors %}is-invalid{% endif %}" value="{{ form.diameter.value|default:'' }}">
+                                            {% if form.diameter.errors %}
+                                                <div class="invalid-feedback">{{ form.diameter.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.season.id_for_label }}" class="form-label">Сезон*</label>
+                                        <select name="{{ form.season.name }}" id="{{ form.season.id_for_label }}" class="form-select {% if form.season.errors %}is-invalid{% endif %}">
+                                            <option value="" {% if not form.season.value %}selected{% endif %}>Выберите сезон</option>
+                                            <option value="summer" {% if form.season.value == 'summer' %}selected{% endif %}>Летние</option>
+                                            <option value="winter" {% if form.season.value == 'winter' %}selected{% endif %}>Зимние</option>
+                                            <option value="all-season" {% if form.season.value == 'all-season' %}selected{% endif %}>Всесезонные</option>
+                                        </select>
+                                        {% if form.season.errors %}
+                                            <div class="invalid-feedback">{{ form.season.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="{{ form.studded.id_for_label }}" class="form-label">Шипы</label>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="{{ form.studded.id_for_label }}" name="{{ form.studded.name }}" {% if form.studded.value %}checked{% endif %}>
+                                            <label class="form-check-label" for="{{ form.studded.id_for_label }}">Шипованная</label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="{{ form.price.id_for_label }}" class="form-label">Цена*</label>
+                                            <div class="input-group">
+                                                <input type="number" name="{{ form.price.name }}" id="{{ form.price.id_for_label }}" class="form-control {% if form.price.errors %}is-invalid{% endif %}" value="{{ form.price.value|default:'' }}">
+                                                <span class="input-group-text">₽</span>
+                                                {% if form.price.errors %}
+                                                    <div class="invalid-feedback">{{ form.price.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="{{ form.stock.id_for_label }}" class="form-label">Наличие*</label>
+                                            <input type="number" name="{{ form.stock.name }}" id="{{ form.stock.id_for_label }}" class="form-control {% if form.stock.errors %}is-invalid{% endif %}" value="{{ form.stock.value|default:'0' }}">
+                                            {% if form.stock.errors %}
+                                                <div class="invalid-feedback">{{ form.stock.errors.0 }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-buttons mt-4">
+                            <button type="submit" class="btn btn-success px-4">
+                                <i class="fas fa-save me-2"></i>Сохранить
+                            </button>
+                            <a href="{% url 'tyres:admin_tyres' %}" class="btn btn-outline-secondary px-4">
+                                <i class="fas fa-times me-2"></i>Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Базовые стили для админ-панели */
+.admin-dashboard {
+    display: flex;
+    min-height: calc(100vh - 72px);
+    background-color: var(--background-color);
+}
+
+/* Боковое меню */
+.admin-sidebar {
+    width: 250px;
+    background: var(--card-bg);
+    padding: 1.5rem 1rem;
+    position: sticky;
+    top: 72px;
+    height: calc(100vh - 72px);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    z-index: 10;
+    transition: all 0.3s;
+    border-right: 1px solid rgba(0,0,0,0.05);
+}
+
+.admin-sidebar-header {
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.admin-sidebar-header h3 {
+    margin: 0;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.admin-sidebar-header span {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.admin-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.admin-nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: all 0.2s;
+}
+
+.admin-nav-link i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.admin-nav-link:hover {
+    background-color: rgba(0,0,0,0.05);
+    color: var(--primary-color);
+}
+
+.admin-nav-link.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* Основное содержимое */
+.admin-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+}
+
+.admin-title {
+    margin: 0;
+    font-weight: 700;
+}
+
+/* Секции */
+.admin-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Форма */
+.form-section {
+    height: 100%;
+    padding-bottom: 1rem;
+}
+
+.form-control, .form-select {
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    border: 1px solid rgba(0,0,0,0.1);
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+}
+
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+}
+
+.form-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+/* Form switch */
+.form-switch .form-check-input {
+    width: 3rem;
+    height: 1.5rem;
+    margin-top: 0;
+}
+
+.form-switch .form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Кнопки с иконками */
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+/* Темная тема */
+body.dark-theme .admin-sidebar {
+    background-color: #1e1e2c;
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+
+body.dark-theme .admin-nav-link:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+
+body.dark-theme .admin-section {
+    background-color: #1e1e2c;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+body.dark-theme .form-control, 
+body.dark-theme .form-select {
+    background-color: #262837;
+    border-color: rgba(255,255,255,0.1);
+    color: #e5e5e5;
+}
+
+/* Адаптивность */
+@media (max-width: 992px) {
+    .admin-dashboard {
+        flex-direction: column;
+    }
+    
+    .admin-sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        top: 0;
+        padding: 1rem;
+    }
+    
+    .admin-nav {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .admin-nav-link {
+        padding: 0.5rem;
+    }
+    
+    .admin-nav-link span {
+        display: none;
+    }
+    
+    .admin-nav-link i {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+    
+    .admin-sidebar-header {
+        display: none;
+    }
+    
+    .admin-content {
+        padding: 1rem;
+    }
+    
+    .admin-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .admin-section {
+        padding: 1.5rem 1rem;
+    }
+    
+    .form-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .form-buttons .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %} 
