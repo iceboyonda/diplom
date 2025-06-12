@@ -39,10 +39,7 @@
                                 <div class="d-flex flex-wrap gap-2">
                                     {% for diameter in available_diameters %}
                                         <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_diameter == diameter|stringformat:'s' %}active{% endif %}"
-                                                hx-get="?diameter={{ diameter }}{{ query_string }}"
-                                                hx-target="#rims-list"
-                                                hx-push-url="true"
-                                                hx-indicator="#loading-indicator">
+                                                onclick="window.location.href='?diameter={{ diameter }}{{ query_string }}'">
                                             {{ diameter }}″
                                         </button>
                                     {% endfor %}
@@ -63,10 +60,7 @@
                                 <div class="d-flex flex-wrap gap-2">
                                     {% for width in available_widths %}
                                         <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_width == width|stringformat:'s' %}active{% endif %}"
-                                                hx-get="?width={{ width }}{{ query_string }}"
-                                                hx-target="#rims-list"
-                                                hx-push-url="true"
-                                                hx-indicator="#loading-indicator">
+                                                onclick="window.location.href='?width={{ width }}{{ query_string }}'">
                                             {{ width }}
                                         </button>
                                     {% endfor %}
@@ -87,10 +81,7 @@
                                 <div class="d-flex flex-wrap gap-2">
                                     {% for pattern in available_bolt_patterns %}
                                         <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_bolt_pattern == pattern %}active{% endif %}"
-                                                hx-get="?bolt_pattern={{ pattern }}{{ query_string }}"
-                                                hx-target="#rims-list"
-                                                hx-push-url="true"
-                                                hx-indicator="#loading-indicator">
+                                                onclick="window.location.href='?bolt_pattern={{ pattern }}{{ query_string }}'">
                                             {{ pattern }}
                                         </button>
                                     {% endfor %}
@@ -111,10 +102,7 @@
                                 <div class="d-flex flex-wrap gap-2">
                                     {% for brand in brands %}
                                         <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_brand == brand %}active{% endif %}"
-                                                hx-get="?brand={{ brand }}{{ query_string }}"
-                                                hx-target="#rims-list"
-                                                hx-push-url="true"
-                                                hx-indicator="#loading-indicator">
+                                                onclick="window.location.href='?brand={{ brand }}{{ query_string }}'">
                                             {{ brand }}
                                         </button>
                                     {% endfor %}
@@ -135,10 +123,7 @@
                                 <div class="d-flex flex-wrap gap-2">
                                     {% for material in materials %}
                                         <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_material == material %}active{% endif %}"
-                                                hx-get="?material={{ material }}{{ query_string }}"
-                                                hx-target="#rims-list"
-                                                hx-push-url="true"
-                                                hx-indicator="#loading-indicator">
+                                                onclick="window.location.href='?material={{ material }}{{ query_string }}'">
                                             {{ material }}
                                         </button>
                                     {% endfor %}
@@ -159,10 +144,7 @@
                                 <div class="d-flex flex-wrap gap-2">
                                     {% for color in colors %}
                                         <button class="btn btn-outline-primary rounded-pill filter-chip {% if selected_color == color %}active{% endif %}"
-                                                hx-get="?color={{ color }}{{ query_string }}"
-                                                hx-target="#rims-list"
-                                                hx-push-url="true"
-                                                hx-indicator="#loading-indicator">
+                                                onclick="window.location.href='?color={{ color }}{{ query_string }}'">
                                             {{ color }}
                                         </button>
                                     {% endfor %}
@@ -180,10 +162,7 @@
                         </h2>
                         <div id="priceCollapse" class="accordion-collapse collapse" data-bs-parent="#filterAccordion">
                             <div class="accordion-body">
-                                <form hx-get="{% url 'tyres:rim_list' %}" 
-                                     hx-target="#rims-list" 
-                                     hx-push-url="true"
-                                     hx-indicator="#loading-indicator">
+                                <form action="{% url 'tyres:rim_list' %}" method="get">
                                     <div class="mb-3">
                                         <label class="form-label">Диапазон цен</label>
                                         <div class="input-group">
@@ -196,24 +175,15 @@
                                 
                                 <div class="d-flex flex-column gap-2 mt-3">
                                     <button class="btn btn-outline-primary text-start filter-btn"
-                                            hx-get="?min_price=0&max_price=10000{{ query_string }}"
-                                            hx-target="#rims-list"
-                                            hx-push-url="true"
-                                            hx-indicator="#loading-indicator">
+                                            onclick="window.location.href='?min_price=0&max_price=10000{{ query_string }}'">
                                         До 10 000 ₽
                                     </button>
                                     <button class="btn btn-outline-primary text-start filter-btn"
-                                            hx-get="?min_price=10000&max_price=30000{{ query_string }}"
-                                            hx-target="#rims-list"
-                                            hx-push-url="true"
-                                            hx-indicator="#loading-indicator">
+                                            onclick="window.location.href='?min_price=10000&max_price=30000{{ query_string }}'">
                                         10 000 - 30 000 ₽
                                     </button>
                                     <button class="btn btn-outline-primary text-start filter-btn"
-                                            hx-get="?min_price=30000{{ query_string }}"
-                                            hx-target="#rims-list"
-                                            hx-push-url="true"
-                                            hx-indicator="#loading-indicator">
+                                            onclick="window.location.href='?min_price=30000{{ query_string }}'">
                                         От 30 000 ₽
                                     </button>
                                 </div>
@@ -241,93 +211,78 @@
                 <h5 class="mb-0">Фильтры дисков</h5>
             </div>
             <div class="card-body">
-                <form action="{% url 'tyres:rim_list' %}" method="get" 
-                      hx-get="{% url 'tyres:rim_list' %}" 
-                      hx-target="#rims-list" 
-                      hx-trigger="change, submit"
-                      hx-indicator="#loading-indicator">
-                    {# Удаляем строку поиска по названию #}
-                    {# <div class="mb-3"><input type="text" name="query" class="form-control border-secondary" placeholder="Поиск по названию..." value="{{ request.GET.q }}"></div> #}
-
-                    <!-- Бренд -->
+                <form action="{% url 'tyres:rim_list' %}" method="get">
                     <div class="mb-3">
                         <label class="form-label">Бренд</label>
-                        <select name="brand" class="form-select border-secondary">
+                        <select name="brand" class="form-select">
                             <option value="">Все бренды</option>
                             {% for brand_option in brands %}
-                                <option value="{{ brand_option }}" {% if brand_option == selected_brand %}selected{% endif %}>{{ brand_option }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Диаметр -->
-                    <div class="mb-3">
-                        <label class="form-label">Диаметр</label>
-                        <select name="diameter" class="form-select border-secondary">
-                            <option value="">Любой</option>
-                            {% for diameter_option in available_diameters %}
-                                <option value="{{ diameter_option }}" {% if diameter_option|stringformat:"s" == selected_diameter %}selected{% endif %}>{{ diameter_option }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Ширина -->
-                    <div class="mb-3">
-                        <label class="form-label">Ширина</label>
-                        <select name="width" class="form-select border-secondary">
-                            <option value="">Любая</option>
-                            {% for width_option in available_widths %}
-                                <option value="{{ width_option }}" {% if width_option|stringformat:"s" == selected_width %}selected{% endif %}>{{ width_option }}</option>
+                                <option value="{{ brand_option }}" {% if selected_brand == brand_option %}selected{% endif %}>{{ brand_option }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     
-                    <!-- Тип крепления -->
+                    <div class="mb-3">
+                        <label class="form-label">Диаметр</label>
+                        <select name="diameter" class="form-select">
+                            <option value="">Любой</option>
+                            {% for diameter in available_diameters %}
+                                <option value="{{ diameter }}" {% if selected_diameter|stringformat:"s" == diameter|stringformat:"s" %}selected{% endif %}>{{ diameter }}″</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Ширина</label>
+                        <select name="width" class="form-select">
+                            <option value="">Любая</option>
+                            {% for width in available_widths %}
+                                <option value="{{ width }}" {% if selected_width|stringformat:"s" == width|stringformat:"s" %}selected{% endif %}>{{ width }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
                     <div class="mb-3">
                         <label class="form-label">Крепление</label>
-                        <select name="bolt_pattern" class="form-select border-secondary">
+                        <select name="bolt_pattern" class="form-select">
                             <option value="">Любое</option>
-                            {% for pattern_option in available_bolt_patterns %}
-                                <option value="{{ pattern_option }}" {% if pattern_option == selected_bolt_pattern %}selected{% endif %}>{{ pattern_option }}</option>
+                            {% for pattern in available_bolt_patterns %}
+                                <option value="{{ pattern }}" {% if selected_bolt_pattern == pattern %}selected{% endif %}>{{ pattern }}</option>
                             {% endfor %}
                         </select>
                     </div>
-
-                    <!-- Материал -->
+                    
                     <div class="mb-3">
                         <label class="form-label">Материал</label>
-                        <select name="material" class="form-select border-secondary">
+                        <select name="material" class="form-select">
                             <option value="">Любой</option>
                             {% for material_option in materials %}
-                                <option value="{{ material_option }}" {% if material_option == selected_material %}selected{% endif %}>{{ material_option }}</option>
+                                <option value="{{ material_option }}" {% if selected_material == material_option %}selected{% endif %}>{{ material_option }}</option>
                             {% endfor %}
                         </select>
                     </div>
-
-                    <!-- Цвет -->
+                    
                     <div class="mb-3">
                         <label class="form-label">Цвет</label>
-                        <select name="color" class="form-select border-secondary">
+                        <select name="color" class="form-select">
                             <option value="">Любой</option>
                             {% for color_option in colors %}
-                                <option value="{{ color_option }}" {% if color_option == selected_color %}selected{% endif %}>{{ color_option }}</option>
+                                <option value="{{ color_option }}" {% if selected_color == color_option %}selected{% endif %}>{{ color_option }}</option>
                             {% endfor %}
                         </select>
                     </div>
-
-                    <!-- Цена -->
+                    
                     <div class="mb-3">
                         <label class="form-label">Цена</label>
                         <div class="input-group mb-2">
-                            <input type="number" name="min_price" class="form-control border-secondary" placeholder="От" value="{{ min_price|default_if_none:'' }}">
-                            <input type="number" name="max_price" class="form-control border-secondary" placeholder="До" value="{{ max_price|default_if_none:'' }}">
+                            <input type="number" name="min_price" class="form-control" placeholder="От" value="{{ min_price|default_if_none:'' }}">
+                            <input type="number" name="max_price" class="form-control" placeholder="До" value="{{ max_price|default_if_none:'' }}">
                         </div>
                     </div>
-
+                    
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary w-100">Применить</button>
-                        <a href="{% url 'tyres:rim_list' %}" 
-                           class="btn btn-secondary w-100">Сбросить</a>
+                        <a href="{% url 'tyres:rim_list' %}" class="btn btn-secondary w-100">Сбросить</a>
                     </div>
                 </form>
             </div>
@@ -340,33 +295,17 @@
         <h1 class="catalogue-title">Каталог дисков</h1>
             <div class="sort-buttons">
                 <div class="btn-group" role="group">
-                    <a href="?sort=price_asc{{ query_string }}" 
-                       class="btn btn-outline-secondary {% if current_sort == 'price_asc' %}active{% endif %}"
-                       hx-get="?sort=price_asc{{ query_string }}"
-                       hx-target="#rims-list"
-                       hx-push-url="true"
-                       hx-indicator="#loading-indicator">
+                    <a href="?sort=price_asc{{ query_string }}" class="btn btn-outline-secondary {% if current_sort == 'price_asc' %}active{% endif %}">
                         По цене ↑
                     </a>
-                    <a href="?sort=price_desc{{ query_string }}" 
-                       class="btn btn-outline-secondary {% if current_sort == 'price_desc' %}active{% endif %}"
-                       hx-get="?sort=price_desc{{ query_string }}"
-                       hx-target="#rims-list"
-                       hx-push-url="true"
-                       hx-indicator="#loading-indicator">
+                    <a href="?sort=price_desc{{ query_string }}" class="btn btn-outline-secondary {% if current_sort == 'price_desc' %}active{% endif %}">
                         По цене ↓
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Индикатор загрузки -->
-        <div id="loading-indicator" class="htmx-indicator text-center">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Загрузка...</span>
-            </div>
-        </div>
-        <div id="rims-list" class="fade-transition" style="margin-top: 0;">
+        <div id="rims-list" class="fade-transition">
             {% include "tyres/_rims_list.html" %}
         </div>
     </div>

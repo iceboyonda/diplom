@@ -23,12 +23,12 @@ urlpatterns = [
     path('admin/categories/', views.admin_categories, name='admin_categories'),
     
     # CRUD операции для шин
-    path('admin/tyre/add/', views.add_tyre, name='add_tyre'),
-    path('admin/tyre/<int:tyre_id>/edit/', views.edit_tyre, name='edit_tyre'),
-    path('admin/tyre/<int:tyre_id>/delete/', views.delete_tyre, name='delete_tyre'),
+    path('admin/tyre/add/', views.admin_tyre_add, name='add_tyre'),
+    path('admin/tyre/<int:tyre_id>/edit/', views.admin_tyre_edit, name='edit_tyre'),
+    path('admin/tyre/<int:tyre_id>/delete/', views.admin_tyre_delete, name='delete_tyre'),
     
     # CRUD операции для дисков
-    path('admin/rim/add/', views.add_rim, name='add_rim'),
-    path('admin/rim/<int:rim_id>/edit/', views.edit_rim, name='edit_rim'),
-    path('admin/rim/<int:rim_id>/delete/', views.delete_rim, name='delete_rim'),
+    path('admin/rim/add/', views.admin_rim_add, name='add_rim'),
+    path('admin/rim/<int:rim_id>/edit/', views.admin_rim_edit, name='edit_rim'),
+    path('admin/rim/<int:rim_id>/delete/', views.admin_rim_delete, name='delete_rim'),
 ] 

@@ -29,8 +29,11 @@ class TyreModel(models.Model):
         return f"{self.brand} {self.name}"
 
     def get_image_url(self):
-        if self.image and default_storage.exists(self.image.name):
-            return self.image.url
+        try:
+            if self.image and hasattr(self.image, 'url'):
+                return self.image.url
+        except Exception:
+            pass
         return settings.STATIC_URL + 'images/default_tyre.jpg'
 
 class TyreVariant(models.Model):
@@ -140,8 +143,11 @@ class RimModel(models.Model):
         return f"{self.brand} {self.name}"
 
     def get_image_url(self):
-        if self.image and default_storage.exists(self.image.name):
-            return self.image.url
+        try:
+            if self.image and hasattr(self.image, 'url'):
+                return self.image.url
+        except Exception:
+            pass
         return settings.STATIC_URL + 'images/default_rim.jpg'
 
 class RimVariant(models.Model):

@@ -30,7 +30,7 @@
             <ul class="pagination justify-content-center">
                 {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" aria-label="Previous">
+                        <a class="page-link" hx-get="?page={{ page_obj.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" hx-target="#tyres-list" aria-label="Previous">
                             <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
@@ -41,14 +41,14 @@
                         <li class="page-item active"><span class="page-link">{{ num }}</span></li>
                     {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}{% if query_string %}&{{ query_string }}{% endif %}">{{ num }}</a>
+                            <a class="page-link" hx-get="?page={{ num }}{% if query_string %}&{{ query_string }}{% endif %}" hx-target="#tyres-list">{{ num }}</a>
                         </li>
                     {% endif %}
                 {% endfor %}
 
                 {% if page_obj.has_next %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" aria-label="Next">
+                        <a class="page-link" hx-get="?page={{ page_obj.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" hx-target="#tyres-list" aria-label="Next">
                             <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>

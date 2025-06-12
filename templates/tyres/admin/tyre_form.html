@@ -10,28 +10,147 @@
         {% csrf_token %}
         
         <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Основная информация</h5>
+            </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="{{ form.brand.id_for_label }}" class="form-label">Бренд</label>
+                            <label for="{{ form.brand.id_for_label }}" class="form-label fw-bold">Бренд</label>
                             {{ form.brand }}
                         </div>
                         <div class="mb-3">
-                            <label for="{{ form.name.id_for_label }}" class="form-label">Модель</label>
+                            <label for="{{ form.name.id_for_label }}" class="form-label fw-bold">Модель</label>
                             {{ form.name }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="width_field" class="form-label fw-bold">Ширина</label>
+                            <input type="text" id="width_field" name="width_field" class="form-control" placeholder="Например: 195, 205, 225, 245">
+                            <small class="form-text text-muted">Укажите через запятую доступные значения ширины</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="profile_field" class="form-label fw-bold">Профиль</label>
+                            <input type="text" id="profile_field" name="profile_field" class="form-control" placeholder="Например: 40, 45, 55, 65">
+                            <small class="form-text text-muted">Укажите через запятую доступные значения профиля</small>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                            <label for="radius_field" class="form-label fw-bold">Радиус</label>
+                            <input type="text" id="radius_field" name="radius_field" class="form-control" placeholder="Например: R15, R16, R17, R18">
+                            <small class="form-text text-muted">Укажите через запятую доступные значения радиуса</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="season_field" class="form-label fw-bold">Сезон</label>
+                            <select id="season_field" name="season_field" class="form-select">
+                                <option value="summer">Летние</option>
+                                <option value="winter">Зимние</option>
+                                <option value="all_season">Всесезонные</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="studded_field" class="form-label fw-bold">Шипы</label>
+                            <select id="studded_field" name="studded_field" class="form-select">
+                                <option value="false">Нет</option>
+                                <option value="true">Да</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="release_year" class="form-label fw-bold">Год выпуска</label>
+                            <input type="number" id="release_year" name="release_year" class="form-control" placeholder="Например: 2023">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">Описание</label>
                             {{ form.description }}
                         </div>
                         <div class="mb-3">
-                            <label for="{{ form.image.id_for_label }}" class="form-label">Изображение</label>
+                            <label for="{{ form.image.id_for_label }}" class="form-label fw-bold">Изображение</label>
                             {{ form.image }}
+                            {% if tyre and tyre.image %}
+                            <div class="mt-2">
+                                <p>Текущее изображение:</p>
+                                <img src="{{ tyre.get_image_url }}" alt="{{ tyre.brand }} {{ tyre.name }}" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; padding: 5px;">
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Варианты</h5>
+                <div>
+                    <button type="button" class="btn btn-success btn-sm" id="generate-variants-btn">Сгенерировать варианты</button>
+                    <button type="button" class="btn btn-light btn-sm" id="add-variant-btn">Добавить вариант</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="variants-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Размер</th>
+                                <th>Сезон</th>
+                                <th>Шипы</th>
+                                <th>Индекс скорости</th>
+                                <th>Цена</th>
+                                <th>В наличии</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="variants-container">
+                            <tr class="variant-row" id="variant-template">
+                                <td>
+                                    <input type="text" class="form-control size-input" name="variant_size[]" placeholder="195/65 R15">
+                                </td>
+                                <td>
+                                    <select class="form-select season-input" name="variant_season[]">
+                                        <option value="summer">Летние</option>
+                                        <option value="winter">Зимние</option>
+                                        <option value="all_season">Всесезонные</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-select studded-input" name="variant_studded[]">
+                                        <option value="false">Нет</option>
+                                        <option value="true">Да</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-select speed-index-input" name="variant_speed_index[]">
+                                        <option value="Q">Q (160 км/ч)</option>
+                                        <option value="R">R (170 км/ч)</option>
+                                        <option value="S">S (180 км/ч)</option>
+                                        <option value="T">T (190 км/ч)</option>
+                                        <option value="H">H (210 км/ч)</option>
+                                        <option value="V">V (240 км/ч)</option>
+                                        <option value="W">W (270 км/ч)</option>
+                                        <option value="Y">Y (300 км/ч)</option>
+                                        <option value="ZR">ZR (>240 км/ч)</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control price-input" name="variant_price[]" placeholder="0.00">
+                                        <span class="input-group-text">₽</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control stock-input" name="variant_stock[]" value="0" min="0">
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm remove-variant-btn">Удалить</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -42,4 +161,143 @@
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide the template row initially
+        const templateRow = document.getElementById('variant-template');
+        templateRow.style.display = 'none';
+        
+        // Add variant button click handler
+        document.getElementById('add-variant-btn').addEventListener('click', function() {
+            addVariantRow();
+        });
+        
+        // Function to add a variant row
+        function addVariantRow(size, season, studded, speedIndex, price, stock) {
+            const container = document.getElementById('variants-container');
+            const newRow = templateRow.cloneNode(true);
+            newRow.style.display = '';
+            newRow.id = 'variant-' + Date.now();
+            
+            // Set values if provided
+            if (size) newRow.querySelector('.size-input').value = size;
+            if (season) newRow.querySelector('.season-input').value = season;
+            if (studded !== undefined) newRow.querySelector('.studded-input').value = studded ? 'true' : 'false';
+            if (speedIndex) newRow.querySelector('.speed-index-input').value = speedIndex;
+            if (price) newRow.querySelector('.price-input').value = price;
+            if (stock !== undefined) newRow.querySelector('.stock-input').value = stock;
+            
+            // Add event listener to remove button
+            newRow.querySelector('.remove-variant-btn').addEventListener('click', function() {
+                container.removeChild(newRow);
+            });
+            
+            container.appendChild(newRow);
+            return newRow;
+        }
+        
+        // Add first row by default if no variants exist
+        {% if variants %}
+            // Load existing variants
+            {% for variant in variants %}
+                const size = "{{ variant.width }}/{{ variant.profile }} R{{ variant.radius }}";
+                const season = "{{ variant.season }}";
+                const studded = {{ variant.studded|lower }};
+                const speedIndex = "{{ variant.speed_index }}";
+                const price = {{ variant.price }};
+                const stock = {{ variant.stock }};
+                addVariantRow(size, season, studded, speedIndex, price, stock);
+            {% endfor %}
+        {% else %}
+            // Add an empty row if no variants exist
+            addVariantRow();
+        {% endif %}
+        
+        // Generate variants based on specifications
+        document.getElementById('generate-variants-btn').addEventListener('click', function() {
+            // Get specification values
+            const widthsStr = document.getElementById('width_field').value;
+            const profilesStr = document.getElementById('profile_field').value;
+            const radiusesStr = document.getElementById('radius_field').value;
+            const season = document.getElementById('season_field').value;
+            const studded = document.getElementById('studded_field').value === 'true';
+            
+            if (!widthsStr || !profilesStr || !radiusesStr) {
+                alert('Пожалуйста, заполните поля Ширина, Профиль и Радиус');
+                return;
+            }
+            
+            // Parse values
+            const widths = widthsStr.split(',').map(w => w.trim()).filter(w => w);
+            const profiles = profilesStr.split(',').map(p => p.trim()).filter(p => p);
+            const radiuses = radiusesStr.split(',').map(r => r.trim().replace('R', '')).filter(r => r);
+            
+            // Clear existing variants
+            const container = document.getElementById('variants-container');
+            while (container.children.length > 1) {
+                container.removeChild(container.lastChild);
+            }
+            
+            // Generate all combinations
+            let speedIndex = 'H'; // Default speed index
+            let price = 0;
+            let stock = 0;
+            
+            for (const width of widths) {
+                for (const profile of profiles) {
+                    for (const radius of radiuses) {
+                        const size = `${width}/${profile} R${radius}`;
+                        addVariantRow(size, season, studded, speedIndex, price, stock);
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Предварительный просмотр загружаемого изображения
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+        if (imageInput) {
+            imageInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Проверяем, есть ли уже элемент предпросмотра
+                        let previewContainer = document.getElementById('image-preview-container');
+                        if (!previewContainer) {
+                            // Создаем контейнер для предпросмотра
+                            previewContainer = document.createElement('div');
+                            previewContainer.id = 'image-preview-container';
+                            previewContainer.className = 'mt-2';
+                            imageInput.parentNode.appendChild(previewContainer);
+                        }
+                        
+                        // Очищаем контейнер
+                        previewContainer.innerHTML = '';
+                        
+                        // Добавляем заголовок
+                        const previewTitle = document.createElement('p');
+                        previewTitle.textContent = 'Предварительный просмотр:';
+                        previewContainer.appendChild(previewTitle);
+                        
+                        // Добавляем изображение
+                        const previewImage = document.createElement('img');
+                        previewImage.src = e.target.result;
+                        previewImage.style.maxWidth = '200px';
+                        previewImage.style.maxHeight = '200px';
+                        previewImage.style.border = '1px solid #ddd';
+                        previewImage.style.padding = '5px';
+                        previewContainer.appendChild(previewImage);
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+    });
+</script>
 {% endblock %} 

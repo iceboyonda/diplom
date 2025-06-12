@@ -967,24 +967,35 @@
         });
         
         // Переключение темы
-        const themeToggle = document.getElementById('theme-toggle');
-        function setTheme(dark) {
-            if (dark) {
-                document.body.classList.add('dark-theme');
-                themeToggle.textContent = '☀️';
-            } else {
-                document.body.classList.remove('dark-theme');
-                themeToggle.textContent = '🌙';
+        if (!window.themeToggleInitialized) {
+            window.themeToggleInitialized = true;
+            themeToggle = document.getElementById('theme-toggle');
+            
+            function setTheme(dark) {
+                if (dark) {
+                    document.body.classList.add('dark-theme');
+                    if (themeToggle) themeToggle.textContent = '☀️';
+                } else {
+                    document.body.classList.remove('dark-theme');
+                    if (themeToggle) themeToggle.textContent = '🌙';
+                }
+            }
+            
+            // Expose the setTheme function globally
+            window.setTheme = setTheme;
+            
+            // Проверяем localStorage при загрузке
+            const dark = localStorage.getItem('theme') === 'dark';
+            setTheme(dark);
+            
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function() {
+                    const isDark = document.body.classList.toggle('dark-theme');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    setTheme(isDark);
+                });
             }
         }
-        // Проверяем localStorage при загрузке
-        const dark = localStorage.getItem('theme') === 'dark';
-        setTheme(dark);
-        themeToggle.addEventListener('click', function() {
-            const isDark = document.body.classList.toggle('dark-theme');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            setTheme(isDark);
-        });
 
         // Инициализация particles.js только если элемент существует
         const particlesEl = document.getElementById('particles-js');
@@ -1071,58 +1082,71 @@
         const mobileSidebar = document.getElementById('mobileSidebar');
         const openSidebarBtn = document.getElementById('openSidebar');
         const closeSidebarBtn = document.getElementById('closeSidebar');
-        const mobileSidebarThemeToggle = document.getElementById('mobileSidebarThemeToggle');
+        let mobileSidebarThemeToggle;
         
-        // Функция для обновления иконки темы в мобильном сайдбаре
-        function updateMobileSidebarThemeIcon() {
-            const isDark = document.body.classList.contains('dark-theme');
-            const iconElement = mobileSidebarThemeToggle.querySelector('i');
-            const textElement = mobileSidebarThemeToggle.querySelector('span');
+        if (!window.mobileSidebarInitialized) {
+            window.mobileSidebarInitialized = true;
+            mobileSidebarThemeToggle = document.getElementById('mobileSidebarThemeToggle');
             
-            if (isDark) {
-                iconElement.className = 'fas fa-sun';
-                textElement.textContent = 'Светлая тема';
-            } else {
-                iconElement.className = 'fas fa-moon';
-                textElement.textContent = 'Тёмная тема';
+            // Функция для обновления иконки темы в мобильном сайдбаре
+            function updateMobileSidebarThemeIcon() {
+                if (!mobileSidebarThemeToggle) return;
+                
+                const isDark = document.body.classList.contains('dark-theme');
+                const iconElement = mobileSidebarThemeToggle.querySelector('i');
+                const textElement = mobileSidebarThemeToggle.querySelector('span');
+                
+                if (isDark) {
+                    iconElement.className = 'fas fa-sun';
+                    textElement.textContent = 'Светлая тема';
+                } else {
+                    iconElement.className = 'fas fa-moon';
+                    textElement.textContent = 'Тёмная тема';
+                }
             }
-        }
-        
-        // Открытие сайдбара
-        openSidebarBtn.addEventListener('click', function() {
-            mobileSidebar.classList.add('show');
-            document.body.classList.add('mobile-menu-open');
-            updateMobileSidebarThemeIcon();
-        });
-        
-        // Закрытие сайдбара
-        closeSidebarBtn.addEventListener('click', function() {
-            mobileSidebar.classList.remove('show');
-            document.body.classList.remove('mobile-menu-open');
-        });
-        
-        // Клик вне сайдбара для закрытия
-        document.addEventListener('click', function(event) {
-            if (mobileSidebar.classList.contains('show') && 
-                !mobileSidebar.contains(event.target) && 
-                event.target !== openSidebarBtn &&
-                !openSidebarBtn.contains(event.target)) {
-                mobileSidebar.classList.remove('show');
-                document.body.classList.remove('mobile-menu-open');
+            
+            // Открытие сайдбара
+            if (openSidebarBtn) {
+                openSidebarBtn.addEventListener('click', function() {
+                    mobileSidebar.classList.add('show');
+                    document.body.classList.add('mobile-menu-open');
+                    updateMobileSidebarThemeIcon();
+                });
             }
-        });
-        
-        // Переключение темы из мобильного сайдбара
-        mobileSidebarThemeToggle.addEventListener('click', function() {
-            const isDark = document.body.classList.toggle('dark-theme');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            setTheme(isDark);
-            updateMobileSidebarThemeIcon();
-        });
-        
-        // Обновляем иконку темы при загрузке
-        if (mobileSidebarThemeToggle) {
-            updateMobileSidebarThemeIcon();
+            
+            // Закрытие сайдбара
+            if (closeSidebarBtn) {
+                closeSidebarBtn.addEventListener('click', function() {
+                    mobileSidebar.classList.remove('show');
+                    document.body.classList.remove('mobile-menu-open');
+                });
+            }
+            
+            // Клик вне сайдбара для закрытия
+            document.addEventListener('click', function(event) {
+                if (mobileSidebar && mobileSidebar.classList.contains('show') && 
+                    !mobileSidebar.contains(event.target) && 
+                    event.target !== openSidebarBtn &&
+                    (!openSidebarBtn || !openSidebarBtn.contains(event.target))) {
+                    mobileSidebar.classList.remove('show');
+                    document.body.classList.remove('mobile-menu-open');
+                }
+            });
+            
+            // Переключение темы из мобильного сайдбара
+            if (mobileSidebarThemeToggle) {
+                mobileSidebarThemeToggle.addEventListener('click', function() {
+                    const isDark = document.body.classList.toggle('dark-theme');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    if (window.setTheme) {
+                        window.setTheme(isDark);
+                    }
+                    updateMobileSidebarThemeIcon();
+                });
+                
+                // Обновляем иконку темы при загрузке
+                updateMobileSidebarThemeIcon();
+            }
         }
     </script>
     {% block extra_js %}{% endblock %}

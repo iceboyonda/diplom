@@ -12,6 +12,7 @@ from django.db import models
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.cache import cache_page
 from django.template.loader import render_to_string
+from django.core.files.storage import default_storage
 
 def annotate_tyres(tyres):
     for tyre_model in tyres:
@@ -123,8 +124,6 @@ def catalogue(request):
         'query_string': query_string,
     }
     
-    if request.headers.get('HX-Request') == 'true':
-        return render(request, 'tyres/_tyres_list.html', context)
     return render(request, 'tyres/catalogue.html', context)
 
 @cache_page(60 * 15)  # Кэширование на 15 минут
@@ -296,40 +295,116 @@ def admin_tyres(request):
 @user_passes_test(lambda u: u.is_staff)
 def admin_tyre_add(request):
     if request.method == 'POST':
-        tyre_form = TyreModelForm(request.POST, request.FILES)
-        variant_formset = TyreVariantFormSet(request.POST, prefix='variants')
-        if tyre_form.is_valid() and variant_formset.is_valid():
-            tyre = tyre_form.save()
-            variants = variant_formset.save(commit=False)
-            for variant in variants:
-                variant.tyre = tyre
-                variant.save()
-            messages.success(request, 'Шина и варианты успешно добавлены.')
+        form = TyreModelForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Save the main tyre model
+            tyre = form.save(commit=False)
+            
+            # Get the release year if provided
+            release_year = request.POST.get('release_year')
+            if release_year and release_year.strip():
+                tyre.release_year = int(release_year)
+            
+            tyre.save()
+            
+            # Process the variants
+            variant_sizes = request.POST.getlist('variant_size[]')
+            variant_seasons = request.POST.getlist('variant_season[]')
+            variant_studded = request.POST.getlist('variant_studded[]')
+            variant_speed_indices = request.POST.getlist('variant_speed_index[]')
+            variant_prices = request.POST.getlist('variant_price[]')
+            variant_stocks = request.POST.getlist('variant_stock[]')
+            
+            # Create variants
+            for i in range(len(variant_sizes)):
+                if not variant_sizes[i]:  # Skip empty rows
+                    continue
+                
+                # Parse size (format: 195/65 R15)
+                try:
+                    size_parts = variant_sizes[i].strip().split('/')
+                    if len(size_parts) != 2:
+                        continue
+                    
+                    width = int(size_parts[0])
+                    
+                    # Handle the profile and radius part (e.g., "65 R15")
+                    profile_radius = size_parts[1].strip().split(' ')
+                    if len(profile_radius) == 2:
+                        profile = int(profile_radius[0])
+                        # Remove 'R' from radius if present
+                        radius = int(profile_radius[1].replace('R', ''))
+                    else:
+                        # Try to handle format like "65R15"
+                        import re
+                        match = re.match(r'(\d+)R(\d+)', size_parts[1])
+                        if match:
+                            profile = int(match.group(1))
+                            radius = int(match.group(2))
+                        else:
+                            continue
+                    
+                    # Create the variant
+                    variant = TyreVariant(
+                        model=tyre,
+                        width=width,
+                        profile=profile,
+                        radius=radius,
+                        season=variant_seasons[i],
+                        studded=variant_studded[i] == 'true',
+                        speed_index=variant_speed_indices[i],
+                        price=float(variant_prices[i]) if variant_prices[i] else 0,
+                        stock=int(variant_stocks[i]) if variant_stocks[i] else 0
+                    )
+                    variant.save()
+                except (ValueError, IndexError) as e:
+                    messages.error(request, f'Ошибка при обработке размера: {variant_sizes[i]}. Проверьте формат (например: 195/65 R15)')
+                    continue
+            
+            messages.success(request, 'Шина успешно добавлена')
             return redirect('tyres:admin_tyres')
     else:
-        tyre_form = TyreModelForm()
-        variant_formset = TyreVariantFormSet(prefix='variants')
-    return render(request, 'tyres/admin_tyre_add.html', {'tyre_form': tyre_form, 'variant_formset': variant_formset})
+        form = TyreModelForm()
+    return render(request, 'tyres/admin/tyre_form.html', {'form': form, 'title': 'Добавить шину'})
 
 @user_passes_test(lambda u: u.is_staff)
 def admin_tyre_edit(request, tyre_id):
     tyre = get_object_or_404(TyreModel, id=tyre_id)
     if request.method == 'POST':
-        tyre_form = TyreModelForm(request.POST, request.FILES, instance=tyre)
-        variant_formset = TyreVariantFormSet(request.POST, instance=tyre, prefix='variants')
-        if tyre_form.is_valid() and variant_formset.is_valid():
-            tyre_form.save()
-            variants = variant_formset.save(commit=False)
-            for variant in variants:
-                variant.tyre = tyre
-                variant.save()
-            variant_formset.save_m2m()
-            messages.success(request, 'Шина и варианты успешно обновлены.')
-            return redirect('tyres:admin_tyre_edit', tyre_id=tyre.id)
+        form = TyreModelForm(request.POST, request.FILES, instance=tyre)
+        if form.is_valid():
+            try:
+                # Проверяем, было ли загружено новое изображение
+                if 'image' in request.FILES:
+                    # Если старое изображение существует и это не изображение по умолчанию, удаляем его
+                    if tyre.image and tyre.image.name != 'tyres/default_tyre.jpg' and default_storage.exists(tyre.image.name):
+                        default_storage.delete(tyre.image.name)
+                
+                # Сохраняем форму
+                tyre_instance = form.save(commit=False)
+                
+                # Если был указан год выпуска
+                release_year = request.POST.get('release_year')
+                if release_year and release_year.strip():
+                    tyre_instance.release_year = int(release_year)
+                
+                tyre_instance.save()
+                messages.success(request, 'Шина успешно обновлена')
+                return redirect('tyres:admin_tyres')
+            except Exception as e:
+                messages.error(request, f'Ошибка при сохранении: {str(e)}')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Ошибка в поле '{field}': {error}")
     else:
-        tyre_form = TyreModelForm(instance=tyre)
-        variant_formset = TyreVariantFormSet(instance=tyre, prefix='variants')
-    return render(request, 'tyres/admin_tyre_edit.html', {'tyre': tyre, 'tyre_form': tyre_form, 'variant_formset': variant_formset})
+        form = TyreModelForm(instance=tyre)
+    
+    return render(request, 'tyres/admin/tyre_form.html', {
+        'form': form, 
+        'title': 'Редактировать шину',
+        'tyre': tyre
+    })
 
 @user_passes_test(lambda u: u.is_staff)
 def admin_tyre_delete(request, tyre_id):
@@ -441,10 +516,6 @@ def rim_list(request):
         'query_string': query_string,
     }
     
-    # Проверяем, является ли запрос HTMX-запросом
-    if request.headers.get('HX-Request'):
-        return render(request, 'tyres/_rims_list.html', context)
-    
     return render(request, 'tyres/rim_list.html', context)
 
 @cache_page(60 * 15)  # Кэширование на 15 минут
@@ -528,40 +599,121 @@ def admin_rims(request):
 @user_passes_test(lambda u: u.is_staff)
 def admin_rim_add(request):
     if request.method == 'POST':
-        rim_form = RimModelForm(request.POST, request.FILES)
-        variant_formset = RimVariantFormSet(request.POST, prefix='variants')
-        if rim_form.is_valid() and variant_formset.is_valid():
-            rim = rim_form.save()
-            variants = variant_formset.save(commit=False)
-            for variant in variants:
-                variant.rim = rim
-                variant.save()
-            messages.success(request, 'Диск и варианты успешно добавлены.')
+        form = RimModelForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Save the main rim model
+            rim = form.save(commit=False)
+            
+            # Get the release year if provided
+            release_year = request.POST.get('release_year')
+            if release_year and release_year.strip():
+                rim.release_year = int(release_year)
+            
+            rim.save()
+            
+            # Process the variants
+            variant_sizes = request.POST.getlist('variant_size[]')
+            variant_offsets = request.POST.getlist('variant_offset[]')
+            variant_dias = request.POST.getlist('variant_dia[]')
+            variant_colors = request.POST.getlist('variant_color[]')
+            variant_materials = request.POST.getlist('variant_material[]')
+            variant_prices = request.POST.getlist('variant_price[]')
+            variant_stocks = request.POST.getlist('variant_stock[]')
+            variant_images = request.FILES.getlist('variant_image[]')
+            
+            # Create variants
+            for i in range(len(variant_sizes)):
+                if not variant_sizes[i]:  # Skip empty rows
+                    continue
+                
+                # Parse size (format: 16.0x7.0 5x100)
+                try:
+                    # Split by space to separate dimensions from bolt pattern
+                    size_parts = variant_sizes[i].strip().split(' ')
+                    if len(size_parts) < 2:
+                        continue
+                    
+                    # Parse dimensions (e.g., "16.0x7.0")
+                    dimensions = size_parts[0].split('x')
+                    if len(dimensions) != 2:
+                        continue
+                    
+                    diameter = float(dimensions[0])
+                    width = float(dimensions[1])
+                    
+                    # Get bolt pattern (e.g., "5x100")
+                    bolt_pattern = size_parts[1]
+                    
+                    # Parse offset (e.g., "ET40" -> "40")
+                    offset = variant_offsets[i].replace('ET', '').strip() if variant_offsets[i] else ''
+                    
+                    # Create the variant
+                    variant = RimVariant(
+                        model=rim,
+                        diameter=diameter,
+                        width=width,
+                        bolt_pattern=bolt_pattern,
+                        offset=offset,
+                        dia=variant_dias[i] if variant_dias[i] else '',
+                        color=variant_colors[i],
+                        material=variant_materials[i],
+                        price=float(variant_prices[i]) if variant_prices[i] else 0,
+                        stock=int(variant_stocks[i]) if variant_stocks[i] else 0
+                    )
+                    
+                    # Handle image if available
+                    if i < len(variant_images) and variant_images[i]:
+                        variant.image = variant_images[i]
+                        
+                    variant.save()
+                except (ValueError, IndexError) as e:
+                    messages.error(request, f'Ошибка при обработке размера: {variant_sizes[i]}. Проверьте формат (например: 16.0x7.0 5x100)')
+                    continue
+            
+            messages.success(request, 'Диск успешно добавлен')
             return redirect('tyres:admin_rims')
     else:
-        rim_form = RimModelForm()
-        variant_formset = RimVariantFormSet(prefix='variants')
-    return render(request, 'tyres/admin_rim_add.html', {'rim_form': rim_form, 'variant_formset': variant_formset})
+        form = RimModelForm()
+    return render(request, 'tyres/admin/rim_form.html', {'form': form, 'title': 'Добавить диск'})
 
 @user_passes_test(lambda u: u.is_staff)
 def admin_rim_edit(request, rim_id):
     rim = get_object_or_404(RimModel, id=rim_id)
     if request.method == 'POST':
-        rim_form = RimModelForm(request.POST, request.FILES, instance=rim)
-        variant_formset = RimVariantFormSet(request.POST, instance=rim, prefix='variants')
-        if rim_form.is_valid() and variant_formset.is_valid():
-            rim_form.save()
-            variants = variant_formset.save(commit=False)
-            for variant in variants:
-                variant.rim = rim
-                variant.save()
-            variant_formset.save_m2m()
-            messages.success(request, 'Диск и варианты успешно обновлены.')
-            return redirect('tyres:admin_rim_edit', rim_id=rim.id)
+        form = RimModelForm(request.POST, request.FILES, instance=rim)
+        if form.is_valid():
+            try:
+                # Проверяем, было ли загружено новое изображение
+                if 'image' in request.FILES:
+                    # Если старое изображение существует и это не изображение по умолчанию, удаляем его
+                    if rim.image and rim.image.name != 'rims/default_rim.jpg' and default_storage.exists(rim.image.name):
+                        default_storage.delete(rim.image.name)
+                
+                # Сохраняем форму
+                rim_instance = form.save(commit=False)
+                
+                # Если был указан год выпуска
+                release_year = request.POST.get('release_year')
+                if release_year and release_year.strip():
+                    rim_instance.release_year = int(release_year)
+                
+                rim_instance.save()
+                messages.success(request, 'Диск успешно обновлен')
+                return redirect('tyres:admin_rims')
+            except Exception as e:
+                messages.error(request, f'Ошибка при сохранении: {str(e)}')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Ошибка в поле '{field}': {error}")
     else:
-        rim_form = RimModelForm(instance=rim)
-        variant_formset = RimVariantFormSet(instance=rim, prefix='variants')
-    return render(request, 'tyres/admin_rim_edit.html', {'rim': rim, 'rim_form': rim_form, 'variant_formset': variant_formset})
+        form = RimModelForm(instance=rim)
+    
+    return render(request, 'tyres/admin/rim_form.html', {
+        'form': form, 
+        'title': 'Редактировать диск',
+        'rim': rim
+    })
 
 @user_passes_test(lambda u: u.is_staff)
 def admin_rim_delete(request, rim_id):
@@ -577,7 +729,70 @@ def add_tyre(request):
     if request.method == 'POST':
         form = TyreModelForm(request.POST, request.FILES)
         if form.is_valid():
-            tyre = form.save()
+            # Save the main tyre model
+            tyre = form.save(commit=False)
+            
+            # Get the release year if provided
+            release_year = request.POST.get('release_year')
+            if release_year and release_year.strip():
+                tyre.release_year = int(release_year)
+            
+            tyre.save()
+            
+            # Process the variants
+            variant_sizes = request.POST.getlist('variant_size[]')
+            variant_seasons = request.POST.getlist('variant_season[]')
+            variant_studded = request.POST.getlist('variant_studded[]')
+            variant_speed_indices = request.POST.getlist('variant_speed_index[]')
+            variant_prices = request.POST.getlist('variant_price[]')
+            variant_stocks = request.POST.getlist('variant_stock[]')
+            
+            # Create variants
+            for i in range(len(variant_sizes)):
+                if not variant_sizes[i]:  # Skip empty rows
+                    continue
+                
+                # Parse size (format: 195/65 R15)
+                try:
+                    size_parts = variant_sizes[i].strip().split('/')
+                    if len(size_parts) != 2:
+                        continue
+                    
+                    width = int(size_parts[0])
+                    
+                    # Handle the profile and radius part (e.g., "65 R15")
+                    profile_radius = size_parts[1].strip().split(' ')
+                    if len(profile_radius) == 2:
+                        profile = int(profile_radius[0])
+                        # Remove 'R' from radius if present
+                        radius = int(profile_radius[1].replace('R', ''))
+                    else:
+                        # Try to handle format like "65R15"
+                        import re
+                        match = re.match(r'(\d+)R(\d+)', size_parts[1])
+                        if match:
+                            profile = int(match.group(1))
+                            radius = int(match.group(2))
+                        else:
+                            continue
+                    
+                    # Create the variant
+                    variant = TyreVariant(
+                        model=tyre,
+                        width=width,
+                        profile=profile,
+                        radius=radius,
+                        season=variant_seasons[i],
+                        studded=variant_studded[i] == 'true',
+                        speed_index=variant_speed_indices[i],
+                        price=float(variant_prices[i]) if variant_prices[i] else 0,
+                        stock=int(variant_stocks[i]) if variant_stocks[i] else 0
+                    )
+                    variant.save()
+                except (ValueError, IndexError) as e:
+                    messages.error(request, f'Ошибка при обработке размера: {variant_sizes[i]}. Проверьте формат (например: 195/65 R15)')
+                    continue
+            
             messages.success(request, 'Шина успешно добавлена')
             return redirect('tyres:admin_tyres')
     else:
@@ -590,12 +805,38 @@ def edit_tyre(request, tyre_id):
     if request.method == 'POST':
         form = TyreModelForm(request.POST, request.FILES, instance=tyre)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Шина успешно обновлена')
-            return redirect('tyres:admin_tyres')
+            try:
+                # Проверяем, было ли загружено новое изображение
+                if 'image' in request.FILES:
+                    # Если старое изображение существует и это не изображение по умолчанию, удаляем его
+                    if tyre.image and tyre.image.name != 'tyres/default_tyre.jpg' and default_storage.exists(tyre.image.name):
+                        default_storage.delete(tyre.image.name)
+                
+                # Сохраняем форму
+                tyre_instance = form.save(commit=False)
+                
+                # Если был указан год выпуска
+                release_year = request.POST.get('release_year')
+                if release_year and release_year.strip():
+                    tyre_instance.release_year = int(release_year)
+                
+                tyre_instance.save()
+                messages.success(request, 'Шина успешно обновлена')
+                return redirect('tyres:admin_tyres')
+            except Exception as e:
+                messages.error(request, f'Ошибка при сохранении: {str(e)}')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Ошибка в поле '{field}': {error}")
     else:
         form = TyreModelForm(instance=tyre)
-    return render(request, 'tyres/admin/tyre_form.html', {'form': form, 'title': 'Редактировать шину'})
+    
+    return render(request, 'tyres/admin/tyre_form.html', {
+        'form': form, 
+        'title': 'Редактировать шину',
+        'tyre': tyre
+    })
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_tyre(request, tyre_id):
@@ -611,7 +852,75 @@ def add_rim(request):
     if request.method == 'POST':
         form = RimModelForm(request.POST, request.FILES)
         if form.is_valid():
-            rim = form.save()
+            # Save the main rim model
+            rim = form.save(commit=False)
+            
+            # Get the release year if provided
+            release_year = request.POST.get('release_year')
+            if release_year and release_year.strip():
+                rim.release_year = int(release_year)
+            
+            rim.save()
+            
+            # Process the variants
+            variant_sizes = request.POST.getlist('variant_size[]')
+            variant_offsets = request.POST.getlist('variant_offset[]')
+            variant_dias = request.POST.getlist('variant_dia[]')
+            variant_colors = request.POST.getlist('variant_color[]')
+            variant_materials = request.POST.getlist('variant_material[]')
+            variant_prices = request.POST.getlist('variant_price[]')
+            variant_stocks = request.POST.getlist('variant_stock[]')
+            variant_images = request.FILES.getlist('variant_image[]')
+            
+            # Create variants
+            for i in range(len(variant_sizes)):
+                if not variant_sizes[i]:  # Skip empty rows
+                    continue
+                
+                # Parse size (format: 16.0x7.0 5x100)
+                try:
+                    # Split by space to separate dimensions from bolt pattern
+                    size_parts = variant_sizes[i].strip().split(' ')
+                    if len(size_parts) < 2:
+                        continue
+                    
+                    # Parse dimensions (e.g., "16.0x7.0")
+                    dimensions = size_parts[0].split('x')
+                    if len(dimensions) != 2:
+                        continue
+                    
+                    diameter = float(dimensions[0])
+                    width = float(dimensions[1])
+                    
+                    # Get bolt pattern (e.g., "5x100")
+                    bolt_pattern = size_parts[1]
+                    
+                    # Parse offset (e.g., "ET40" -> "40")
+                    offset = variant_offsets[i].replace('ET', '').strip() if variant_offsets[i] else ''
+                    
+                    # Create the variant
+                    variant = RimVariant(
+                        model=rim,
+                        diameter=diameter,
+                        width=width,
+                        bolt_pattern=bolt_pattern,
+                        offset=offset,
+                        dia=variant_dias[i] if variant_dias[i] else '',
+                        color=variant_colors[i],
+                        material=variant_materials[i],
+                        price=float(variant_prices[i]) if variant_prices[i] else 0,
+                        stock=int(variant_stocks[i]) if variant_stocks[i] else 0
+                    )
+                    
+                    # Handle image if available
+                    if i < len(variant_images) and variant_images[i]:
+                        variant.image = variant_images[i]
+                        
+                    variant.save()
+                except (ValueError, IndexError) as e:
+                    messages.error(request, f'Ошибка при обработке размера: {variant_sizes[i]}. Проверьте формат (например: 16.0x7.0 5x100)')
+                    continue
+            
             messages.success(request, 'Диск успешно добавлен')
             return redirect('tyres:admin_rims')
     else:
@@ -624,12 +933,38 @@ def edit_rim(request, rim_id):
     if request.method == 'POST':
         form = RimModelForm(request.POST, request.FILES, instance=rim)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Диск успешно обновлен')
-            return redirect('tyres:admin_rims')
+            try:
+                # Проверяем, было ли загружено новое изображение
+                if 'image' in request.FILES:
+                    # Если старое изображение существует и это не изображение по умолчанию, удаляем его
+                    if rim.image and rim.image.name != 'rims/default_rim.jpg' and default_storage.exists(rim.image.name):
+                        default_storage.delete(rim.image.name)
+                
+                # Сохраняем форму
+                rim_instance = form.save(commit=False)
+                
+                # Если был указан год выпуска
+                release_year = request.POST.get('release_year')
+                if release_year and release_year.strip():
+                    rim_instance.release_year = int(release_year)
+                
+                rim_instance.save()
+                messages.success(request, 'Диск успешно обновлен')
+                return redirect('tyres:admin_rims')
+            except Exception as e:
+                messages.error(request, f'Ошибка при сохранении: {str(e)}')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"Ошибка в поле '{field}': {error}")
     else:
         form = RimModelForm(instance=rim)
-    return render(request, 'tyres/admin/rim_form.html', {'form': form, 'title': 'Редактировать диск'})
+    
+    return render(request, 'tyres/admin/rim_form.html', {
+        'form': form, 
+        'title': 'Редактировать диск',
+        'rim': rim
+    })
 
 @user_passes_test(lambda u: u.is_staff)
 def delete_rim(request, rim_id):

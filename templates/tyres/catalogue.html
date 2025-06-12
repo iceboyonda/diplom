@@ -61,15 +61,7 @@
                     <h5 class="mb-0">Фильтры</h5>
                 </div>
                 <div class="card-body">
-                    <form action="{% url 'tyres:catalogue' %}" method="get" 
-                          hx-get="{% url 'tyres:catalogue' %}" 
-                          hx-target="#tyres-list" 
-                          hx-swap="innerHTML"
-                          hx-trigger="change, submit"
-                          hx-push-url="true"
-                          hx-indicator="#loading-indicator"
-                          hx-on--after-request="this.form.reset()">
-
+                    <form action="{% url 'tyres:catalogue' %}" method="get">
                         <!-- Бренд -->
                         <div class="mb-3">
                             <label class="form-label">Бренд</label>
@@ -158,27 +150,14 @@
                 <div class="sort-buttons">
                     <div class="btn-group" role="group">
                         <a href="?sort=price_asc{{ query_string }}" 
-                           class="btn btn-outline-secondary {% if current_sort == 'price_asc' %}active{% endif %}"
-                           hx-get="?sort=price_asc{{ query_string }}"
-                           hx-target="#tyres-list"
-                           hx-push-url="true"
-                           hx-indicator="#loading-indicator">
+                           class="btn btn-outline-secondary {% if current_sort == 'price_asc' %}active{% endif %}">
                             По цене ↑
                         </a>
                         <a href="?sort=price_desc{{ query_string }}" 
-                           class="btn btn-outline-secondary {% if current_sort == 'price_desc' %}active{% endif %}"
-                           hx-get="?sort=price_desc{{ query_string }}"
-                           hx-target="#tyres-list"
-                           hx-push-url="true"
-                           hx-indicator="#loading-indicator">
+                           class="btn btn-outline-secondary {% if current_sort == 'price_desc' %}active{% endif %}">
                             По цене ↓
                         </a>
                     </div>
-                </div>
-            </div>
-            <div id="loading-indicator" class="htmx-indicator text-center">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Загрузка...</span>
                 </div>
             </div>
             <div id="tyres-list" class="fade-transition" style="margin-top: 0;">

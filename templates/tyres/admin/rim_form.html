@@ -10,28 +10,155 @@
         {% csrf_token %}
         
         <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Основная информация</h5>
+            </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="{{ form.brand.id_for_label }}" class="form-label">Бренд</label>
+                            <label for="{{ form.brand.id_for_label }}" class="form-label fw-bold">Бренд</label>
                             {{ form.brand }}
                         </div>
                         <div class="mb-3">
-                            <label for="{{ form.name.id_for_label }}" class="form-label">Модель</label>
+                            <label for="{{ form.name.id_for_label }}" class="form-label fw-bold">Модель</label>
                             {{ form.name }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="diameter_field" class="form-label fw-bold">Диаметр</label>
+                            <input type="text" id="diameter_field" name="diameter_field" class="form-control" placeholder="Например: 16.0, 17.0">
+                            <small class="form-text text-muted">Укажите через запятую доступные значения диаметра</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="width_field" class="form-label fw-bold">Ширина</label>
+                            <input type="text" id="width_field" name="width_field" class="form-control" placeholder="Например: 7.0, 7.5">
+                            <small class="form-text text-muted">Укажите через запятую доступные значения ширины</small>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="{{ form.description.id_for_label }}" class="form-label">Описание</label>
+                            <label for="bolt_pattern_field" class="form-label fw-bold">Тип крепления</label>
+                            <input type="text" id="bolt_pattern_field" name="bolt_pattern_field" class="form-control" placeholder="Например: 5x100, 5x114.3">
+                            <small class="form-text text-muted">Укажите через запятую доступные типы крепления</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="material_field" class="form-label fw-bold">Материал</label>
+                            <select id="material_field" name="material_field" class="form-select">
+                                <option value="forged">Кованый</option>
+                                <option value="cast">Литой</option>
+                                <option value="stamped">Штампованный</option>
+                                <option value="other">Другой</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="color_field" class="form-label fw-bold">Цвет</label>
+                            <select id="color_field" name="color_field" class="form-select">
+                                <option value="silver">Серебристый</option>
+                                <option value="black">Черный</option>
+                                <option value="grey">Серый</option>
+                                <option value="white">Белый</option>
+                                <option value="bronze">Бронзовый</option>
+                                <option value="custom">Другой</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="release_year" class="form-label fw-bold">Год выпуска</label>
+                            <input type="number" id="release_year" name="release_year" class="form-control" placeholder="Например: 2023">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">Описание</label>
                             {{ form.description }}
                         </div>
                         <div class="mb-3">
-                            <label for="{{ form.image.id_for_label }}" class="form-label">Изображение</label>
+                            <label for="{{ form.image.id_for_label }}" class="form-label fw-bold">Изображение</label>
                             {{ form.image }}
+                            {% if rim and rim.image %}
+                            <div class="mt-2">
+                                <p>Текущее изображение:</p>
+                                <img src="{{ rim.get_image_url }}" alt="{{ rim.brand }} {{ rim.name }}" style="max-width: 200px; max-height: 200px; border: 1px solid #ddd; padding: 5px;">
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Варианты</h5>
+                <div>
+                    <button type="button" class="btn btn-success btn-sm" id="generate-variants-btn">Сгенерировать варианты</button>
+                    <button type="button" class="btn btn-light btn-sm" id="add-variant-btn">Добавить вариант</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="variants-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Размер</th>
+                                <th>Вылет (ET)</th>
+                                <th>DIA</th>
+                                <th>Цвет</th>
+                                <th>Материал</th>
+                                <th>Цена</th>
+                                <th>В наличии</th>
+                                <th>Изображение</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody id="variants-container">
+                            <tr class="variant-row" id="variant-template">
+                                <td>
+                                    <input type="text" class="form-control size-input" name="variant_size[]" placeholder="16.0x7.0 5x100">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control offset-input" name="variant_offset[]" placeholder="ET40">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control dia-input" name="variant_dia[]" placeholder="73.1">
+                                </td>
+                                <td>
+                                    <select class="form-select color-input" name="variant_color[]">
+                                        <option value="silver">Серебристый</option>
+                                        <option value="black">Черный</option>
+                                        <option value="grey">Серый</option>
+                                        <option value="white">Белый</option>
+                                        <option value="bronze">Бронзовый</option>
+                                        <option value="custom">Другой</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-select material-input" name="variant_material[]">
+                                        <option value="forged">Кованый</option>
+                                        <option value="cast">Литой</option>
+                                        <option value="stamped">Штампованный</option>
+                                        <option value="other">Другой</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control price-input" name="variant_price[]" placeholder="0.00">
+                                        <span class="input-group-text">₽</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control stock-input" name="variant_stock[]" value="0" min="0">
+                                </td>
+                                <td>
+                                    <input type="file" class="form-control image-input" name="variant_image[]" accept="image/*">
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-sm remove-variant-btn">Удалить</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -42,4 +169,146 @@
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Hide the template row initially
+        const templateRow = document.getElementById('variant-template');
+        templateRow.style.display = 'none';
+        
+        // Add variant button click handler
+        document.getElementById('add-variant-btn').addEventListener('click', function() {
+            addVariantRow();
+        });
+        
+        // Function to add a variant row
+        function addVariantRow(size, offset, dia, color, material, price, stock) {
+            const container = document.getElementById('variants-container');
+            const newRow = templateRow.cloneNode(true);
+            newRow.style.display = '';
+            newRow.id = 'variant-' + Date.now();
+            
+            // Set values if provided
+            if (size) newRow.querySelector('.size-input').value = size;
+            if (offset) newRow.querySelector('.offset-input').value = offset;
+            if (dia) newRow.querySelector('.dia-input').value = dia;
+            if (color) newRow.querySelector('.color-input').value = color;
+            if (material) newRow.querySelector('.material-input').value = material;
+            if (price) newRow.querySelector('.price-input').value = price;
+            if (stock !== undefined) newRow.querySelector('.stock-input').value = stock;
+            
+            // Add event listener to remove button
+            newRow.querySelector('.remove-variant-btn').addEventListener('click', function() {
+                container.removeChild(newRow);
+            });
+            
+            container.appendChild(newRow);
+            return newRow;
+        }
+        
+        // Add first row by default if no variants exist
+        {% if variants %}
+            // Load existing variants
+            {% for variant in variants %}
+                const size = "{{ variant.diameter }}x{{ variant.width }} {{ variant.bolt_pattern }}";
+                const offset = "{{ variant.offset }}";
+                const dia = "{{ variant.dia }}";
+                const color = "{{ variant.color }}";
+                const material = "{{ variant.material }}";
+                const price = {{ variant.price }};
+                const stock = {{ variant.stock }};
+                addVariantRow(size, offset, dia, color, material, price, stock);
+            {% endfor %}
+        {% else %}
+            // Add an empty row if no variants exist
+            addVariantRow();
+        {% endif %}
+        
+        // Generate variants based on specifications
+        document.getElementById('generate-variants-btn').addEventListener('click', function() {
+            // Get specification values
+            const diametersStr = document.getElementById('diameter_field').value;
+            const widthsStr = document.getElementById('width_field').value;
+            const boltPatternsStr = document.getElementById('bolt_pattern_field').value;
+            const color = document.getElementById('color_field').value;
+            const material = document.getElementById('material_field').value;
+            
+            if (!diametersStr || !widthsStr || !boltPatternsStr) {
+                alert('Пожалуйста, заполните поля Диаметр, Ширина и Тип крепления');
+                return;
+            }
+            
+            // Parse values
+            const diameters = diametersStr.split(',').map(d => d.trim()).filter(d => d);
+            const widths = widthsStr.split(',').map(w => w.trim()).filter(w => w);
+            const boltPatterns = boltPatternsStr.split(',').map(bp => bp.trim()).filter(bp => bp);
+            
+            // Clear existing variants
+            const container = document.getElementById('variants-container');
+            while (container.children.length > 1) {
+                container.removeChild(container.lastChild);
+            }
+            
+            // Generate all combinations
+            let offset = 'ET40'; // Default offset
+            let dia = '73.1'; // Default DIA
+            let price = 0;
+            let stock = 0;
+            
+            for (const diameter of diameters) {
+                for (const width of widths) {
+                    for (const boltPattern of boltPatterns) {
+                        const size = `${diameter}x${width} ${boltPattern}`;
+                        addVariantRow(size, offset, dia, color, material, price, stock);
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Предварительный просмотр загружаемого изображения
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('{{ form.image.id_for_label }}');
+        if (imageInput) {
+            imageInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Проверяем, есть ли уже элемент предпросмотра
+                        let previewContainer = document.getElementById('image-preview-container');
+                        if (!previewContainer) {
+                            // Создаем контейнер для предпросмотра
+                            previewContainer = document.createElement('div');
+                            previewContainer.id = 'image-preview-container';
+                            previewContainer.className = 'mt-2';
+                            imageInput.parentNode.appendChild(previewContainer);
+                        }
+                        
+                        // Очищаем контейнер
+                        previewContainer.innerHTML = '';
+                        
+                        // Добавляем заголовок
+                        const previewTitle = document.createElement('p');
+                        previewTitle.textContent = 'Предварительный просмотр:';
+                        previewContainer.appendChild(previewTitle);
+                        
+                        // Добавляем изображение
+                        const previewImage = document.createElement('img');
+                        previewImage.src = e.target.result;
+                        previewImage.style.maxWidth = '200px';
+                        previewImage.style.maxHeight = '200px';
+                        previewImage.style.border = '1px solid #ddd';
+                        previewImage.style.padding = '5px';
+                        previewContainer.appendChild(previewImage);
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+    });
+</script>
 {% endblock %} 

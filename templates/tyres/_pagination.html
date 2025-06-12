@@ -3,12 +3,7 @@
     <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
             <li class="page-item">
-                <a class="page-link" 
-                   href="?page={{ page_obj.previous_page_number }}{{ query_string }}"
-                   hx-get="?page={{ page_obj.previous_page_number }}{{ query_string }}"
-                   hx-target="#tyres-list"
-                   hx-push-url="true"
-                   hx-indicator="#loading-indicator">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ query_string }}">
                     Предыдущая
                 </a>
             </li>
@@ -18,6 +13,19 @@
             </li>
         {% endif %}
 
+        <!-- First page -->
+        {% if page_obj.number > 3 %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{{ query_string }}">1</a>
+            </li>
+            {% if page_obj.number > 4 %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endif %}
+
+        <!-- Page numbers -->
         {% for num in page_obj.paginator.page_range %}
             {% if page_obj.number == num %}
                 <li class="page-item active">
@@ -25,26 +33,30 @@
                 </li>
             {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                 <li class="page-item">
-                    <a class="page-link" 
-                       href="?page={{ num }}{{ query_string }}"
-                       hx-get="?page={{ num }}{{ query_string }}"
-                       hx-target="#tyres-list"
-                       hx-push-url="true"
-                       hx-indicator="#loading-indicator">
+                    <a class="page-link" href="?page={{ num }}{{ query_string }}">
                         {{ num }}
                     </a>
                 </li>
             {% endif %}
         {% endfor %}
 
+        <!-- Last page -->
+        {% if page_obj.number < page_obj.paginator.num_pages|add:'-2' %}
+            {% if page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{{ query_string }}">
+                    {{ page_obj.paginator.num_pages }}
+                </a>
+            </li>
+        {% endif %}
+
         {% if page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" 
-                   href="?page={{ page_obj.next_page_number }}{{ query_string }}"
-                   hx-get="?page={{ page_obj.next_page_number }}{{ query_string }}"
-                   hx-target="#tyres-list"
-                   hx-push-url="true"
-                   hx-indicator="#loading-indicator">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{{ query_string }}">
                     Следующая
                 </a>
             </li>
