@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="300" viewBox="0 0 900 300">
+  <style>
+    @font-face {
+      font-family: 'Elephant-Like';
+      src: local('Elephant'), local('Georgia'), local('Times New Roman');
+      font-weight: bold;
+    }
+    .logo-text {
+      font-family: 'Elephant-Like', serif;
+      font-weight: bold;
+      fill: #FFFFFF;
+      letter-spacing: 0px;
+      dominant-baseline: middle;
+      text-anchor: middle;
+    }
+  </style>
+  <text x="450" y="100" class="logo-text" font-size="130">TYRE</text>
+  <text x="450" y="220" class="logo-text" font-size="130">TRUST</text>
+</svg>
