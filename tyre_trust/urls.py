@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from .views import log_js_error
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),
@@ -26,6 +27,7 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('cart/', include('cart.urls')),
     path('orders/', include('orders.urls')),
+    path('api/log-js-error/', log_js_error, name='log_js_error'),
 ]
 
 # Добавляем обработку медиа и статических файлов в режиме разработки

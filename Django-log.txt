@@ -1,0 +1,78 @@
+# Django Log File
+# This file contains logs for the Tyre Trust application
+
+[2025-06-12 18:30:00] INFO [django.server] Starting development server at http://127.0.0.1:8000/
+[2025-06-12 18:30:15] INFO [django.server] "GET / HTTP/1.1" 200 19854
+[2025-06-12 18:30:18] INFO [django.server] "GET /tyres/catalogue/ HTTP/1.1" 200 20145
+[2025-06-12 18:30:25] INFO [django.server] "GET /tyres/catalogue/?page=2 HTTP/1.1" 200 19987
+[2025-06-12 18:30:28] INFO [django.server] "GET /tyres/catalogue/?page=1 HTTP/1.1" 200 20145
+[2025-06-12 18:31:05] INFO [django.server] "GET /tyres/rim_list/ HTTP/1.1" 200 18756
+[2025-06-12 18:31:10] INFO [django.server] "GET /tyres/rim_list/?page=2 HTTP/1.1" 200 18543
+[2025-06-12 18:31:15] INFO [django.server] "GET /tyres/rim_list/?page=1 HTTP/1.1" 200 18756
+[2025-06-12 18:32:00] INFO [django.server] "GET /accounts/login/ HTTP/1.1" 200 5421
+[2025-06-12 18:32:30] INFO [django.server] "POST /accounts/login/ HTTP/1.1" 302 0
+[2025-06-12 18:32:31] INFO [django.server] "GET / HTTP/1.1" 200 20654
+[2025-06-12 18:33:00] INFO [django.server] "GET /tyres/tyre_detail/5/ HTTP/1.1" 200 12543
+[2025-06-12 18:33:15] INFO [django.server] "POST /cart/add/5/ HTTP/1.1" 302 0
+[2025-06-12 18:33:16] INFO [django.server] "GET /cart/cart_detail/ HTTP/1.1" 200 9876
+[2025-06-12 18:34:00] INFO [django.server] "GET /tyres/favourites/ HTTP/1.1" 200 7654
+[2025-06-12 18:34:30] INFO [django.server] "GET /accounts/profile/ HTTP/1.1" 200 8765
+[2025-06-12 18:35:00] INFO [django.server] "GET /accounts/logout/ HTTP/1.1" 302 0
+[2025-06-12 18:35:01] INFO [django.server] "GET / HTTP/1.1" 200 19854
+
+# Error logs
+[2025-06-12 18:40:15] ERROR [django.request] Internal Server Error: /tyres/catalogue/?page=2
+Traceback (most recent call last):
+  File "/path/to/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+  File "/path/to/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "/path/to/django/views/decorators/cache.py", line 44, in _wrapped_view_func
+    response = view_func(request, *args, **kwargs)
+  File "/c/project/1/diplom/tyres/views.py", line 95, in catalogue
+    annotated_tyres = annotate_tyres(page_obj.object_list)
+  File "/c/project/1/diplom/tyres/views.py", line 15, in annotate_tyres
+    for tyre_model in tyres:
+TypeError: 'NoneType' object is not iterable
+
+# Fixed in commit 3a7b2c5
+
+[2025-06-12 18:45:23] ERROR [django.template.base] Uncaught SyntaxError: Failed to execute 'insertBefore' on 'Node': Identifier 'themeToggle' has already been declared
+    at At (htmx.org@1.9.10:1:22924)
+    at Nt (htmx.org@1.9.10:1:23051)
+    at htmx.org@1.9.10:1:10309
+    at htmx.org@1.9.10:1:44741
+    at oe (htmx.org@1.9.10:1:4604)
+    at s (htmx.org@1.9.10:1:44716)
+
+# Fixed by removing 'let themeToggle;' declaration in base.html and updating pagination links to use HTMX properly
+# Commit 7f9e2d8
+
+[2025-06-12 19:00:05] INFO [django.server] "GET /tyres/catalogue/?page=2 HTTP/1.1" 200 19987
+[2025-06-12 19:00:10] INFO [django.server] "GET /tyres/catalogue/?page=1 HTTP/1.1" 200 20145
+[2025-06-12 19:00:15] INFO [django.server] "GET /tyres/rim_list/?page=2 HTTP/1.1" 200 18543
+[2025-06-12 19:00:20] INFO [django.server] "GET /tyres/rim_list/?page=1 HTTP/1.1" 200 18756 [2025-06-12 18:44:08] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:44:08] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:44:08] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:44:08] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:44:09] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:44:09] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:44:09] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:44:09] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:45:23] INFO [autoreload] C:\project\1\diplom\tyre_trust\urls.py changed, reloading.
+[2025-06-12 18:45:23] INFO [autoreload] C:\project\1\diplom\tyre_trust\urls.py changed, reloading.
+[2025-06-12 18:45:23] INFO [autoreload] C:\project\1\diplom\tyre_trust\urls.py changed, reloading.
+[2025-06-12 18:45:24] INFO [autoreload] C:\project\1\diplom\tyre_trust\urls.py changed, reloading.
+[2025-06-12 18:45:24] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:45:24] INFO [autoreload] C:\project\1\diplom\tyre_trust\urls.py changed, reloading.
+[2025-06-12 18:45:24] INFO [autoreload] C:\project\1\diplom\tyre_trust\urls.py changed, reloading.
+[2025-06-12 18:45:24] INFO [autoreload] C:\project\1\diplom\tyre_trust\urls.py changed, reloading.
+[2025-06-12 18:45:24] INFO [autoreload] C:\project\1\diplom\tyre_trust\urls.py changed, reloading.
+[2025-06-12 18:45:24] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:45:24] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:45:24] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:45:24] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:45:24] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:45:24] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:45:24] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 18:46:16] INFO [autoreload] Watching for file changes with StatReloader

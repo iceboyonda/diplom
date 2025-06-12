@@ -966,6 +966,53 @@
             });
         });
         
+        // Обработчик ошибок HTMX
+        document.body.addEventListener('htmx:error', function(event) {
+            // Отправляем ошибку на сервер для логирования
+            fetch('/api/log-js-error/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    error: 'HTMX Error',
+                    url: event.detail.xhr ? event.detail.xhr.responseURL : window.location.href,
+                    line: 0,
+                    column: 0,
+                    stack: JSON.stringify({
+                        status: event.detail.xhr ? event.detail.xhr.status : 'unknown',
+                        error: event.detail.error,
+                        elt: event.detail.elt ? event.detail.elt.outerHTML : 'unknown'
+                    })
+                })
+            }).catch(err => {
+                console.error('Ошибка при отправке лога HTMX:', err);
+            });
+        });
+        
+        // Глобальный обработчик ошибок JavaScript
+        window.onerror = function(message, source, lineno, colno, error) {
+            // Отправляем ошибку на сервер для логирования
+            fetch('/api/log-js-error/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    error: message,
+                    url: source,
+                    line: lineno,
+                    column: colno,
+                    stack: error ? error.stack : ''
+                })
+            }).catch(err => {
+                console.error('Ошибка при отправке лога:', err);
+            });
+            
+            // Разрешаем стандартную обработку ошибки
+            return false;
+        };
+        
         // Переключение темы
         if (!window.themeToggleInitialized) {
             window.themeToggleInitialized = true;
