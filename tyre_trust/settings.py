@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-your-secret-key-here'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['94.241.139.148', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['94.241.139.148', 'localhost', '127.0.0.1', 'tyretrust.ru', 'www.tyretrust.ru']
 
 
 # Application definition
@@ -84,24 +84,28 @@ WSGI_APPLICATION = 'tyre_trust.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 # MySQL database configuration
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'tyre_trust',
-#         'USER': 'root',
-#         'PASSWORD': 'iceboy',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#     }
-# }
-
-# SQLite database configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'tyre_trust',
+        'USER': 'tyre_trust_user',
+        'PASSWORD': 'secure_password',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
+
+# SQLite database configuration - для локальной разработки
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -138,7 +142,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'tyre_trust/static'),
@@ -165,12 +169,34 @@ LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'tyres:catalogue'
 LOGOUT_REDIRECT_URL = 'tyres:catalogue'
 
-# Отключение кэширования для разработки
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+# Настройки кэширования
+if not DEBUG:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.memcached.PyMemcacheCache',
+            'LOCATION': '127.0.0.1:11211',
+            'TIMEOUT': 60 * 15,  # 15 минут
+        }
     }
-}
+else:
+    # Отключение кэширования для разработки
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.dummy.DummyCache',
+        }
+    }
+
+# Настройки безопасности для продакшена
+if not DEBUG:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = 31536000  # 1 год
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
 
 # Настройки логирования
 LOGGING = {
@@ -228,3 +254,9 @@ LOGGING = {
         },
     },
 }
+
+# Импорт локальных настроек, если файл существует
+try:
+    from .local_settings import *
+except ImportError:
+    pass
