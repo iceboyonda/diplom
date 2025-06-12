@@ -97,3 +97,27 @@ TypeError: 'NoneType' object is not iterable
 [2025-06-12 19:37:35] INFO [autoreload] Watching for file changes with StatReloader
 [2025-06-12 19:38:17] INFO [autoreload] C:\project\1\diplom\tyre_trust\settings.py changed, reloading.
 [2025-06-12 19:38:17] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 19:39:03] ERROR [exception] Invalid HTTP_HOST header: 'testserver'. You may need to add 'testserver' to ALLOWED_HOSTS.
+Traceback (most recent call last):
+  File "C:\Users\plato\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\plato\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\utils\deprecation.py", line 133, in __call__
+    response = self.process_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\plato\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\middleware\common.py", line 48, in process_request
+    host = request.get_host()
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\plato\AppData\Local\Programs\Python\Python312\Lib\site-packages\django\http\request.py", line 150, in get_host
+    raise DisallowedHost(msg)
+django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'testserver'. You may need to add 'testserver' to ALLOWED_HOSTS.
+[2025-06-12 19:39:10] INFO [basehttp] "GET /accounts/admin-panel/ HTTP/1.1" 200 60427
+[2025-06-12 19:39:11] INFO [basehttp] "GET /accounts/admin-panel/ HTTP/1.1" 200 60427
+[2025-06-12 19:39:11] INFO [basehttp] "GET /accounts/admin-panel/ HTTP/1.1" 200 60427
+[2025-06-12 19:39:29] INFO [autoreload] C:\project\1\diplom\tyre_trust\local_settings.py changed, reloading.
+[2025-06-12 19:39:30] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 19:39:40] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 19:39:46] INFO [autoreload] C:\project\1\diplom\tyre_trust\settings.py changed, reloading.
+[2025-06-12 19:39:46] INFO [autoreload] C:\project\1\diplom\tyre_trust\settings.py changed, reloading.
+[2025-06-12 19:39:47] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 19:39:47] INFO [autoreload] Watching for file changes with StatReloader
