@@ -86,17 +86,11 @@ WSGI_APPLICATION = 'tyre_trust.wsgi.application'
 # MySQL database configuration
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tyre_trust',
-        'USER': 'tyre_trust_user',
-        'PASSWORD': 'secure_password',
-        'HOST': 'localhost',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'db.sqlite3',
     }
 }
+
 
 # SQLite database configuration - для локальной разработки
 if DEBUG:
@@ -248,14 +242,15 @@ LOGGING = {
             'propagate': False,
         },
         'django.db.backends': {
-            'handlers': ['file'],
-            'level': 'ERROR',
+            'handlers': ['console'],
+            'level': 'WARNING',
             'propagate': False,
         },
-    },
+    }
 }
 
-# Импорт локальных настроек, если файл существует
+# Импорт локальных настроек
+# Позволяет переопределить настройки для локальной разработки
 try:
     from .local_settings import *
 except ImportError:

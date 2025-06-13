@@ -70,16 +70,8 @@ class Cart:
         for product_id, item in self.cart.items():
             if item['type'] == 'tyre':
                 item['product'] = tyres.get(int(product_id))
-                if item['product']:
-                    print(f"[DEBUG CART] Tyre product loaded: {item['product'].model.brand} {item['product'].model.name}")
-                else:
-                    print(f"[DEBUG CART] Tyre product not found for ID: {product_id}")
             elif item['type'] == 'rim':
                 item['product'] = rims.get(int(product_id))
-                if item['product']:
-                    print(f"[DEBUG CART] Rim product loaded: {item['product'].model.brand} {item['product'].model.name}")
-                else:
-                    print(f"[DEBUG CART] Rim product not found for ID: {product_id}")
             item['total_price'] = float(item['price']) * item['quantity']
             yield item
 

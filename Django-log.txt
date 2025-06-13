@@ -121,3 +121,10 @@ django.core.exceptions.DisallowedHost: Invalid HTTP_HOST header: 'testserver'. Y
 [2025-06-12 19:39:46] INFO [autoreload] C:\project\1\diplom\tyre_trust\settings.py changed, reloading.
 [2025-06-12 19:39:47] INFO [autoreload] Watching for file changes with StatReloader
 [2025-06-12 19:39:47] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 19:43:30] INFO [autoreload] C:\project\1\diplom\accounts\views.py changed, reloading.
+[2025-06-12 19:43:30] INFO [autoreload] C:\project\1\diplom\accounts\views.py changed, reloading.
+[2025-06-12 19:43:30] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 19:43:30] INFO [autoreload] Watching for file changes with StatReloader
+[2025-06-12 19:49:00] INFO [basehttp] "GET /accounts/admin-panel/ HTTP/1.1" 302 0
+[2025-06-12 19:49:00] INFO [basehttp] "GET /accounts/login/ HTTP/1.1" 200 53257
+[2025-06-12 19:49:01] INFO [basehttp] "GET /accounts/login/ HTTP/1.1" 200 52878

@@ -55,6 +55,8 @@ def user_logout(request):
     messages.success(request, 'Вы успешно вышли из системы')
     return redirect('tyres:catalogue')
 
+# Добавляем декоратор для проверки прав доступа
+@login_required
 @user_passes_test(lambda u: u.is_staff or u.is_superuser)
 def admin_panel(request):
     # Получаем статистику для админ-панели
@@ -75,6 +77,11 @@ def admin_panel(request):
         'user_count': user_count,
         'order_count': order_count,
         'recent_orders': recent_orders,
+        'user_info': {
+            'username': request.user.username,
+            'is_staff': request.user.is_staff,
+            'is_superuser': request.user.is_superuser,
+        }
     }
     
     return render(request, 'accounts/admin_panel.html', context)
